@@ -32,6 +32,10 @@ import { PatientSearchQuery } from '../../models/patient-search-query.model';
 import { PatientSearchResult } from '../../models/patient-search-result.model';
 import { PatientSex } from '../../models/patient-sex.model';
 import { isSearchActive } from '../../utils/patient-search.matcher';
+import {
+  filterHospitalsByLocation,
+  hospitalMatchesLocationFilter,
+} from '../../utils/hospital-location.filter';
 import { PATIENT_SEARCH_DEBOUNCE_MS, PATIENT_SEARCH_PAGE_SIZE, SLOW_SEARCH_THRESHOLD_MS } from '../../utils/patient-search.constants';
 
 @Component({
@@ -118,6 +122,13 @@ export class PatientSearchPage {
   });
 
   readonly hospitals = computed(() => this.hospitalsResource.value());
+  readonly availableHospitals = computed(() =>
+    filterHospitalsByLocation(this.hospitals(), {
+      estadoId: this.selectedEstadoId(),
+      municipioId: this.selectedMunicipioId(),
+      parroquiaId: this.selectedParroquiaId(),
+    }),
+  );
   readonly estados = computed(() => this.estadosResource.value());
   readonly municipios = computed(() => this.municipiosResource.value());
   readonly parroquias = computed(() => this.parroquiasResource.value());
@@ -302,6 +313,7 @@ export class PatientSearchPage {
     this.selectedEstadoId.set(filters.estadoId);
     this.selectedMunicipioId.set(filters.municipioId);
     this.selectedParroquiaId.set(filters.parroquiaId);
+    this.resetHospitalIfOutsideLocation();
     this.page.set(1);
     this.runSearchIfActive();
   }
@@ -337,12 +349,15 @@ export class PatientSearchPage {
         break;
       case 'estado':
         this.selectedEstadoId.set(null);
+        this.resetHospitalIfOutsideLocation();
         break;
       case 'municipio':
         this.selectedMunicipioId.set(null);
+        this.resetHospitalIfOutsideLocation();
         break;
       case 'parroquia':
         this.selectedParroquiaId.set(null);
+        this.resetHospitalIfOutsideLocation();
         break;
     }
 
@@ -513,6 +528,25 @@ export class PatientSearchPage {
     this.selectedHospitalId.set(null);
     this.selectedSex.set(null);
     this.selectedEstadoId.set(null);
+  }
+
+  private resetHospitalIfOutsideLocation(): void {
+    const hospitalId = this.selectedHospitalId();
+    if (!hospitalId) {
+      return;
+    }
+
+    const hospital = this.hospitals().find((item) => item.id === hospitalId);
+    if (
+      !hospital ||
+      !hospitalMatchesLocationFilter(hospital, {
+        estadoId: this.selectedEstadoId(),
+        municipioId: this.selectedMunicipioId(),
+        parroquiaId: this.selectedParroquiaId(),
+      })
+    ) {
+      this.selectedHospitalId.set(null);
+    }
   }
 
   private buildSearchQuery(query = this.query()): PatientSearchQuery {

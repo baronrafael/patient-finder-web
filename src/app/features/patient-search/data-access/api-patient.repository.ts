@@ -9,6 +9,7 @@ import { PatientRecord } from '../models/patient-record.model';
 import { PatientSearchQuery } from '../models/patient-search-query.model';
 import { PatientSearchResult } from '../models/patient-search-result.model';
 import { formatSearchQueryForApi } from '../utils/patient-search.matcher';
+import { CENTERS_PAGE_SIZE } from '../utils/patient-search.constants';
 import { PatientRepository } from './patient.repository';
 
 interface ApiStateDto {
@@ -50,7 +51,19 @@ interface ApiCenterDto {
   readonly id: string;
   readonly name: string;
   readonly type?: string;
+  readonly estado_id?: string | null;
+  readonly municipio_id?: string | null;
+  readonly parroquia_id?: string | null;
+  readonly address?: string | null;
+  readonly is_active?: boolean;
   readonly contacts?: unknown;
+}
+
+interface ApiCentersResponseDto {
+  readonly data: {
+    readonly centers: readonly ApiCenterDto[];
+  };
+  readonly pagination?: ApiPaginationDto;
 }
 
 interface ApiPersonDto {
@@ -92,8 +105,23 @@ export class ApiPatientRepository extends PatientRepository {
   private readonly config = inject(APP_CONFIG);
 
   override getHospitals(): Observable<readonly Hospital[]> {
-    // Pendiente: César no documentó endpoint de hospitales todavía.
-    return of([]);
+    const params = new HttpParams().set('page_size', CENTERS_PAGE_SIZE);
+
+    return this.http.get<ApiCentersResponseDto>(`${this.config.apiBaseUrl}/centers`, { params }).pipe(
+      map((response) =>
+        (response.data.centers ?? [])
+          .filter((center) => center.is_active !== false)
+          .map((center) => ({
+            id: center.id,
+            name: center.name,
+            sourceNames: [center.name],
+            recordCount: 0,
+            estadoId: center.estado_id ?? null,
+            municipioId: center.municipio_id ?? null,
+            parroquiaId: center.parroquia_id ?? null,
+          })),
+      ),
+    );
   }
 
   override getEstados(): Observable<readonly Estado[]> {
@@ -153,6 +181,9 @@ export class ApiPatientRepository extends PatientRepository {
     }
     if (query.parroquiaId) {
       params = params.set('parroquia_id', query.parroquiaId);
+    }
+    if (query.hospitalId) {
+      params = params.set('center_id', query.hospitalId);
     }
     if (query.page > 1) {
       params = params.set('page', query.page);

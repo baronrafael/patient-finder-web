@@ -80,7 +80,7 @@
             <div id="optional-filters-panel" class="border-t border-slate-200 p-4">
               @if (showHospitalFilter()) {
                 <app-hospital-filter
-                  [hospitals]="hospitals()"
+                  [hospitals]="availableHospitals()"
                   [selectedHospitalId]="selectedHospitalId()"
                   (hospitalChange)="updateHospital($event)"
                 />

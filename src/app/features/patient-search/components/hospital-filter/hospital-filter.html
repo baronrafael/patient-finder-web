@@ -7,8 +7,12 @@
   >
     <option value="">Todos los hospitales</option>
     @for (hospital of hospitals(); track hospital.id) {
-      <option [value]="hospital.id" [title]="hospital.name + ' (' + hospital.recordCount + ')'">
-        {{ hospital.name }} ({{ hospital.recordCount }})
+      <option [value]="hospital.id" [title]="hospital.name">
+        @if (hospital.recordCount > 0) {
+          {{ hospital.name }} ({{ hospital.recordCount }})
+        } @else {
+          {{ hospital.name }}
+        }
       </option>
     }
   </select>
