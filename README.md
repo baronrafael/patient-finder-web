@@ -1,8 +1,19 @@
 # Buscador de Pacientes Venezuela
 
-MVP público para buscar personas registradas en listas consolidadas de hospitales y centros de atención después del sismo de Venezuela de junio de 2026.
+Frontend web ([patient-finder-web](https://github.com/baronrafael/patient-finder-web)) para buscar personas registradas en listas consolidadas de hospitales y centros de atención después del sismo de Venezuela de junio de 2026.
 
 La función principal es permitir buscar por nombre, apellido, nombre completo o cédula y ver en qué hospital o centro aparece registrada la persona.
+
+## Inicio Rápido
+
+```bash
+git clone https://github.com/baronrafael/patient-finder-web.git
+cd patient-finder-web
+npm install
+npm start
+```
+
+El repositorio ya incluye `public/data/patients.mock.json` y el Excel en `data-source/`, listos para desarrollo local sin pasos adicionales.
 
 ## Stack
 
@@ -24,13 +35,15 @@ La función principal es permitir buscar por nombre, apellido, nombre completo o
 
 ## Instalación
 
+Si ya clonaste el repositorio:
+
 ```bash
 npm install
 ```
 
 ## Fuente de Datos
 
-Coloca el Excel en:
+Para actualizar el dataset, coloca el Excel en:
 
 ```text
 data-source/25JUN26 8PM Pacientes Consolidados Hospitales Venezuela.xlsx
@@ -132,6 +145,8 @@ Mientras se use `patients.mock.json`, el navegador descarga el dataset completo.
 En producción con backend, la búsqueda debe ser server-side para no descargar toda la base al cliente.
 
 El sitio incluye `robots.txt` y meta `noindex,nofollow,noarchive` para reducir indexación accidental por buscadores.
+
+> **Privacidad:** este repositorio es público y contiene datos de pacientes en `public/data/` y `data-source/`. No compartas el enlace fuera del equipo operativo sin revisar esa exposición.
 
 ## Contrato Backend Esperado
 
