@@ -10,6 +10,7 @@
         inputId="login-email"
         type="email"
         autocomplete="username"
+        [refinedBorder]="true"
         [field]="loginForm.email"
       />
 
@@ -18,6 +19,7 @@
         inputId="login-password"
         type="password"
         autocomplete="current-password"
+        [refinedBorder]="true"
         [field]="loginForm.password"
       />
 
@@ -25,7 +27,11 @@
         <div class="alert alert-error text-sm" role="alert">{{ message }}</div>
       }
 
-      <button class="btn btn-primary w-full" type="submit" [disabled]="loading()">
+      <button
+        class="btn btn-primary min-h-12 w-full px-4 shadow-sm transition-shadow hover:shadow-md"
+        type="submit"
+        [disabled]="loading()"
+      >
         @if (loading()) {
           <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
           Ingresando...

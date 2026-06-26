@@ -1,0 +1,15 @@
+<button
+  class="btn btn-primary min-h-12 px-4 shadow-sm transition-shadow hover:shadow-md"
+  [class.w-full]="fullWidth()"
+  [class.flex-1]="!fullWidth()"
+  [class.sm:flex-none]="!fullWidth()"
+  [type]="type()"
+  [disabled]="disabled() || loading()"
+>
+  @if (loading()) {
+    <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
+    {{ loadingLabel() }}
+  } @else {
+    <ng-content />
+  }
+</button>

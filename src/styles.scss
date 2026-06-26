@@ -32,6 +32,19 @@ body {
   white-space: nowrap;
 }
 
+/* Mismo borde refinado del buscador; en styles.scss (fuera de @layer) para ganar a daisyUI. */
+input.search-input.input.input-bordered {
+  border-color: #cbd5e1;
+}
+
+input.search-input.input.input-bordered:focus,
+input.search-input.input.input-bordered:focus-visible {
+  border-color: #94a3b8;
+  box-shadow: 0 0 0 2px rgb(148 163 184 / 0.25);
+  outline: none;
+  outline-offset: 0;
+}
+
 .skip-link {
   position: absolute;
   left: -9999px;

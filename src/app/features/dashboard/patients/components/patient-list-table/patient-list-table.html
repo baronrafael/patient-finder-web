@@ -1,0 +1,42 @@
+<div class="overflow-x-auto">
+  <table class="table table-zebra">
+    <caption class="sr-only">Lista de pacientes registrados en el centro activo</caption>
+    <thead>
+      <tr>
+        <th scope="col">Nombre</th>
+        <th scope="col">Cédula</th>
+        <th scope="col">Sexo</th>
+        <th scope="col">Edad</th>
+        <th scope="col">Estado</th>
+        <th scope="col">Centro</th>
+        <th scope="col">Ingreso</th>
+        <th scope="col" class="text-right">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (person of items(); track person.id) {
+        <tr>
+          <td class="font-medium text-slate-900">{{ person.fullName }}</td>
+          <td>{{ person.identityDocument || '—' }}</td>
+          <td>{{ person.sex || '—' }}</td>
+          <td>{{ person.age || '—' }}</td>
+          <td>{{ person.statusLabel }}</td>
+          <td>{{ person.centerName }}</td>
+          <td>{{ person.admittedAtLabel }}</td>
+          <td>
+            <div class="flex justify-end gap-2">
+              @if (person.canEdit) {
+                <a class="btn btn-soft btn-sm" [routerLink]="patientDetailPath()(person.id)">Editar</a>
+              }
+              @if (person.canDelete) {
+                <button class="btn btn-soft btn-sm" type="button" disabled title="Próximamente">
+                  Eliminar
+                </button>
+              }
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

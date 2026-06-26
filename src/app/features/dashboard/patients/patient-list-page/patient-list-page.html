@@ -8,7 +8,70 @@
     }
   </app-page-header>
 
-  <div class="content-placeholder">
-    <p>La tabla paginada y filtros se implementan en el siguiente ticket.</p>
-  </div>
+  <app-patient-list-filters
+    [applied]="store.appliedFiltersState()"
+    [loading]="store.loading()"
+    [disabled]="store.needsCenterSelection()"
+    [hasActiveFilters]="store.hasActiveFilters()"
+    (filtersSubmit)="store.submitFilters($event)"
+    (filtersClear)="store.clearFilters()"
+  />
+
+  @if (store.needsCenterSelection()) {
+    <app-empty-state
+      title="Selecciona un centro"
+      message="Tienes acceso a varios centros. Elige uno en el panel lateral para ver sus pacientes."
+    />
+  } @else if (store.initialLoading()) {
+    <app-loading-skeleton />
+  } @else if (store.error(); as message) {
+    <app-error-state [message]="message" (retry)="store.retry()" />
+  } @else if (store.isEmpty()) {
+    <app-empty-state
+      title="Sin pacientes"
+      message="No hay registros con los filtros actuales. Prueba otra búsqueda o limpia los filtros."
+    >
+      <button class="btn btn-soft" type="button" (click)="store.clearFilters()">Limpiar filtros</button>
+    </app-empty-state>
+  } @else if (store.hasItems()) {
+    <div
+      class="patient-list-page__results"
+      [class.patient-list-page__results--refreshing]="store.refreshing()"
+    >
+      @if (store.refreshing()) {
+        <p class="patient-list-page__refreshing-label" aria-live="polite">Actualizando…</p>
+      }
+
+      <app-patient-list-table
+        [items]="store.items()"
+        [patientDetailPath]="paths.patientDetail"
+      />
+
+      <nav
+        class="patient-list-page__pagination"
+        aria-label="Paginación de pacientes"
+        [attr.aria-busy]="store.refreshing()"
+      >
+        <p class="text-sm text-slate-600">{{ store.pageSummary() }}</p>
+        <div class="flex gap-2">
+          <button
+            class="btn btn-soft btn-sm"
+            type="button"
+            [disabled]="store.refreshing() || store.currentPage() <= 1"
+            (click)="store.goToPage(store.currentPage() - 1)"
+          >
+            Anterior
+          </button>
+          <button
+            class="btn btn-soft btn-sm"
+            type="button"
+            [disabled]="store.refreshing() || store.currentPage() >= store.totalPages()"
+            (click)="store.goToPage(store.currentPage() + 1)"
+          >
+            Siguiente
+          </button>
+        </div>
+      </nav>
+    </div>
+  }
 </app-page-shell>

@@ -1,1 +1,1 @@
-export type PatientSex = 'm' | 'f';
+export type { PersonSex as PatientSex } from '../../../core/models/person-sex.model';

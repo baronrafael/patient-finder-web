@@ -1,0 +1,50 @@
+<form class="patient-list-filters" (submit)="onSearchSubmit($event)">
+  <div class="patient-list-filters__search">
+    <div class="patient-list-filters__search-row">
+      <app-text-field
+        class="min-w-0 flex-1"
+        label="Nombre o cédula"
+        inputId="patient-list-search"
+        type="search"
+        autocomplete="off"
+        placeholder="Ej. García o 28443736"
+        [refinedBorder]="true"
+        [field]="filterForm.query"
+      />
+      <button
+        class="btn btn-primary min-h-12 shrink-0 px-4 shadow-sm transition-shadow hover:shadow-md"
+        type="submit"
+        [disabled]="isSubmitDisabled()"
+      >
+        Buscar
+      </button>
+    </div>
+  </div>
+
+  <div class="patient-list-filters__grid">
+    <app-select-field label="Sexo" selectId="patient-list-sex" [field]="filterForm.sex">
+      @for (option of sexOptions; track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+      }
+    </app-select-field>
+
+    <app-select-field label="Estado" selectId="patient-list-status" [field]="filterForm.status">
+      @for (option of statusOptions; track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+      }
+    </app-select-field>
+  </div>
+
+  @if (hasActiveFilters()) {
+    <button
+      class="btn btn-soft btn-sm"
+      type="button"
+      [disabled]="disabled()"
+      (click)="onClearFilters()"
+    >
+      Limpiar filtros
+    </button>
+  }
+
+  <p class="field-hint">Pulsa Buscar para aplicar los filtros.</p>
+</form>

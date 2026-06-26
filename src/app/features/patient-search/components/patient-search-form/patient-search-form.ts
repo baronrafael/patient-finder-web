@@ -9,17 +9,16 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { FormField, form } from '@angular/forms/signals';
 
 import { isSearchActive } from '../../utils/patient-search.matcher';
 import { PATIENT_SEARCH_MESSAGES } from '../../utils/patient-search.messages';
 import { bindControlledField } from '../../utils/bind-controlled-field';
-import { FormField, form } from '@angular/forms/signals';
 
 @Component({
   selector: 'app-patient-search-form',
   imports: [FormField],
   templateUrl: './patient-search-form.html',
-  styleUrl: './patient-search-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PatientSearchForm {

@@ -2,20 +2,16 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Field, FormField } from '@angular/forms/signals';
 
 @Component({
-  selector: 'app-text-field',
+  selector: 'app-search-field',
   imports: [FormField],
-  templateUrl: './text-field.html',
+  templateUrl: './search-field.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    class: 'block w-full',
-  },
 })
-export class TextField {
+export class SearchField {
   readonly label = input.required<string>();
   readonly inputId = input.required<string>();
   readonly field = input.required<Field<string>>();
-  readonly type = input<'text' | 'email' | 'password' | 'search' | 'tel'>('text');
-  readonly autocomplete = input<string | null>(null);
   readonly placeholder = input<string | null>(null);
-  readonly refinedBorder = input(false);
+  readonly autocomplete = input('off');
+  readonly inputmode = input<string | null>('search');
 }

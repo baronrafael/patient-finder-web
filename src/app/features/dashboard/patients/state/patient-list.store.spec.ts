@@ -1,0 +1,93 @@
+import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
+import { of } from 'rxjs';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { PermissionService } from '../../../../core/auth/permission.service';
+import { PERSON_ADMIN_REPOSITORY } from '../data-access/person-admin-repository.token';
+import { PersonListResult } from '../models/person-list-result.model';
+import { PatientListStore } from './patient-list.store';
+
+const emptyResult: PersonListResult = {
+  items: [],
+  total: 0,
+  page: 1,
+  pageSize: 20,
+  totalPages: 1,
+};
+
+describe('PatientListStore', () => {
+  const activeCenterId = signal<string | null>('center-1');
+  const hasMultipleCenters = signal(false);
+  const list = vi.fn(() => of(emptyResult));
+
+  beforeEach(() => {
+    activeCenterId.set('center-1');
+    hasMultipleCenters.set(false);
+    list.mockClear();
+
+    TestBed.configureTestingModule({
+      providers: [
+        PatientListStore,
+        {
+          provide: PERSON_ADMIN_REPOSITORY,
+          useValue: { list },
+        },
+        {
+          provide: PermissionService,
+          useValue: {
+            activeCenterId: activeCenterId.asReadonly(),
+            hasMultipleCenters: hasMultipleCenters.asReadonly(),
+            can: () => true,
+          },
+        },
+      ],
+    });
+  });
+
+  it('requires center selection when multiple centers are available', () => {
+    hasMultipleCenters.set(true);
+    activeCenterId.set(null);
+    const store = TestBed.inject(PatientListStore);
+
+    expect(store.needsCenterSelection()).toBe(true);
+    expect(store.initialLoading()).toBe(false);
+  });
+
+  it('applies trimmed filters on submit', () => {
+    const store = TestBed.inject(PatientListStore);
+
+    store.submitFilters({ query: '  Garcia ', sex: 'm', status: 'hospitalized' });
+
+    expect(store.appliedFiltersState()).toEqual({
+      query: 'Garcia',
+      sex: 'm',
+      status: 'hospitalized',
+    });
+    expect(store.hasActiveFilters()).toBe(true);
+  });
+
+  it('clears applied filters', () => {
+    const store = TestBed.inject(PatientListStore);
+
+    store.submitFilters({ query: 'Garcia', sex: null, status: null });
+    store.clearFilters();
+
+    expect(store.appliedFiltersState()).toEqual({
+      query: '',
+      sex: null,
+      status: null,
+    });
+    expect(store.hasActiveFilters()).toBe(false);
+  });
+
+  it('reloads when submitting the same filters again', () => {
+    const store = TestBed.inject(PatientListStore);
+    const reloadSpy = vi.spyOn(store.listResource, 'reload');
+
+    store.submitFilters({ query: 'Garcia', sex: null, status: null });
+    store.submitFilters({ query: 'Garcia', sex: null, status: null });
+
+    expect(reloadSpy).toHaveBeenCalledTimes(1);
+  });
+});

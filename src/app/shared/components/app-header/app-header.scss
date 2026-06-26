@@ -16,6 +16,13 @@
   padding: 1.25rem 1rem 1.5rem;
 }
 
+.app-header__row {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
 .app-header__title {
   margin: 0;
   color: #020617;
