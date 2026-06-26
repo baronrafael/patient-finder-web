@@ -94,8 +94,8 @@ export class PatientSearchPage {
   });
 
   readonly municipiosResource = rxResource({
-    stream: () => {
-      const estadoId = this.selectedEstadoId();
+    params: () => this.selectedEstadoId(),
+    stream: ({ params: estadoId }) => {
       if (!estadoId) {
         return of([] as readonly Municipio[]);
       }
@@ -106,8 +106,8 @@ export class PatientSearchPage {
   });
 
   readonly parroquiasResource = rxResource({
-    stream: () => {
-      const municipioId = this.selectedMunicipioId();
+    params: () => this.selectedMunicipioId(),
+    stream: ({ params: municipioId }) => {
       if (!municipioId) {
         return of([] as readonly Parroquia[]);
       }
@@ -124,7 +124,11 @@ export class PatientSearchPage {
   readonly showHospitalFilter = computed(() => this.hospitals().length > 0);
 
   readonly catalogError = computed(() => {
-    const loadError = this.hospitalsResource.error() ?? this.estadosResource.error();
+    const loadError =
+      this.hospitalsResource.error() ??
+      this.estadosResource.error() ??
+      this.municipiosResource.error() ??
+      this.parroquiasResource.error();
     return loadError ? mapHttpError(loadError) : null;
   });
 
