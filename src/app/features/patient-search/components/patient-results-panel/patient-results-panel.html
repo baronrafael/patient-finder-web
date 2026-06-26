@@ -1,13 +1,6 @@
 <section class="min-w-0 space-y-4" aria-labelledby="results-heading">
   <div class="panel panel-compact lg:sticky lg:top-6 lg:z-10">
-    <div class="flex flex-wrap items-baseline justify-between gap-2">
-      <h2 id="results-heading" class="text-base font-bold text-slate-950 sm:text-lg">Resultados</h2>
-      @if (hasSearched() && result(); as searchResult) {
-        <span class="rounded-full bg-teal-50 px-2.5 py-0.5 text-sm font-medium text-teal-800">
-          {{ formatCount(searchResult.total) }}
-        </span>
-      }
-    </div>
+    <h2 id="results-heading" class="text-base font-bold text-slate-950 sm:text-lg">Resultados</h2>
     <p class="mt-1 text-sm text-slate-600" aria-live="polite">{{ resultSummary() }}</p>
   </div>
 

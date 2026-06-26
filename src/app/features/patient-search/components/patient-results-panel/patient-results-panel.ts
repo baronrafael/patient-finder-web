@@ -5,7 +5,6 @@ import { ErrorState } from '../../../../shared/components/error-state/error-stat
 import { LoadingSkeleton } from '../../../../shared/components/loading-skeleton/loading-skeleton';
 import { PatientSearchResult } from '../../models/patient-search-result.model';
 import { PatientResultsList } from '../patient-results-list/patient-results-list';
-import { formatResultCount } from '../../utils/format-result-count';
 
 @Component({
   selector: 'app-patient-results-panel',
@@ -31,6 +30,4 @@ export class PatientResultsPanel {
   readonly clearAllFilters = output<void>();
   readonly focusSearch = output<void>();
   readonly loadMore = output<void>();
-
-  protected readonly formatCount = formatResultCount;
 }
