@@ -1,0 +1,18 @@
+<app-page-shell>
+  <app-page-header title="Perfil" />
+
+  @if (user(); as currentUser) {
+    <dl class="profile-page__details">
+      <div>
+        <dt>Nombre</dt>
+        <dd>{{ currentUser.name || '—' }}</dd>
+      </div>
+      <div>
+        <dt>Email</dt>
+        <dd>{{ currentUser.email }}</dd>
+      </div>
+    </dl>
+  }
+
+  <p class="profile-page__note">El cambio de contraseña se implementa en TICKET-601.</p>
+</app-page-shell>

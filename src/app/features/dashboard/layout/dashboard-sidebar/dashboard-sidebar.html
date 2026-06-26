@@ -1,0 +1,35 @@
+<aside class="dashboard-sidebar" aria-label="Navegación del dashboard">
+  <div class="dashboard-sidebar__brand">
+    <p class="hero-kicker">Terremoto VE</p>
+    <p class="dashboard-sidebar__title">Data Entry</p>
+  </div>
+
+  <app-center-selector />
+
+  <nav class="dashboard-sidebar__nav">
+    @if (showPatients()) {
+      <a
+        class="nav-link"
+        [routerLink]="paths.patients"
+        routerLinkActive="nav-link-active"
+        [routerLinkActiveOptions]="{ exact: false }"
+      >
+        Pacientes
+      </a>
+    }
+
+    @if (showUsers()) {
+      <a
+        class="nav-link"
+        [routerLink]="paths.users"
+        routerLinkActive="nav-link-active"
+      >
+        Usuarios
+      </a>
+    }
+
+    <a class="nav-link" [routerLink]="paths.profile" routerLinkActive="nav-link-active">
+      Perfil
+    </a>
+  </nav>
+</aside>

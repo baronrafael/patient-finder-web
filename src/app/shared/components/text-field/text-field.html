@@ -1,0 +1,10 @@
+<label class="text-field" [for]="inputId()">
+  <span class="field-label">{{ label() }}</span>
+  <input
+    class="input input-bordered field-control min-h-12 text-base"
+    [id]="inputId()"
+    [type]="type()"
+    [attr.autocomplete]="autocomplete()"
+    [formField]="field()"
+  />
+</label>

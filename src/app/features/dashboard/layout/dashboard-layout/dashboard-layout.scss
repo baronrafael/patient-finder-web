@@ -1,0 +1,25 @@
+.dashboard-layout {
+  display: grid;
+  min-height: 100dvh;
+}
+
+@media (min-width: 1024px) {
+  .dashboard-layout {
+    grid-template-columns: 16rem minmax(0, 1fr);
+  }
+}
+
+.dashboard-layout__main {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.dashboard-layout__content {
+  flex: 1;
+  padding: 1rem;
+
+  @media (min-width: 640px) {
+    padding: 1.5rem;
+  }
+}

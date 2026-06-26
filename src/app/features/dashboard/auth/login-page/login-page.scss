@@ -1,0 +1,19 @@
+.login-page {
+  align-items: center;
+  background: linear-gradient(180deg, rgb(240 253 250) 0%, rgb(248 250 252) 40%, rgb(248 250 252) 100%);
+  display: flex;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 1.5rem;
+}
+
+.login-page__card {
+  width: min(100%, 28rem);
+}
+
+.login-page__title {
+  color: rgb(15 23 42);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 0.25rem;
+}

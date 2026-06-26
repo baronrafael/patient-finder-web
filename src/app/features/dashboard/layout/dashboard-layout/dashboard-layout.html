@@ -1,0 +1,11 @@
+<div class="dashboard-layout min-h-dvh bg-slate-50">
+  <app-dashboard-sidebar />
+
+  <div class="dashboard-layout__main">
+    <app-dashboard-header (logout)="logout()" />
+
+    <main class="dashboard-layout__content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

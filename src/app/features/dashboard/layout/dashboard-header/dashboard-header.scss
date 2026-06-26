@@ -1,0 +1,53 @@
+.dashboard-header {
+  align-items: center;
+  background: white;
+  border-bottom: 1px solid rgb(226 232 240 / 0.9);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  justify-content: space-between;
+  padding: 0.875rem 1rem;
+
+  @media (min-width: 640px) {
+    padding: 1rem 1.5rem;
+  }
+}
+
+.dashboard-header__start {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.dashboard-header__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgb(15 23 42);
+
+  @media (min-width: 640px) {
+    font-size: 1.125rem;
+  }
+}
+
+.dashboard-header__actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+}
+
+.dashboard-header__user {
+  color: rgb(51 65 85);
+  font-size: 0.875rem;
+  font-weight: 600;
+  max-width: 14rem;
+  overflow: hidden;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover {
+    color: rgb(15 118 110);
+  }
+}

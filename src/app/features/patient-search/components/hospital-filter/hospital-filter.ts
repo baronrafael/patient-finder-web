@@ -11,12 +11,12 @@ import {
 import { disabled, form } from '@angular/forms/signals';
 
 import { Hospital } from '../../models/hospital.model';
-import { FilterSelectField } from '../filter-select-field/filter-select-field';
+import { SelectField } from '../../../../shared/components/select-field/select-field';
 import { bindControlledField } from '../../utils/bind-controlled-field';
 
 @Component({
   selector: 'app-hospital-filter',
-  imports: [FilterSelectField],
+  imports: [SelectField],
   templateUrl: './hospital-filter.html',
   styleUrl: './hospital-filter.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

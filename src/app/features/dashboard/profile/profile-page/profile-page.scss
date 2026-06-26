@@ -1,0 +1,25 @@
+.profile-page__details {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.25rem;
+
+  dt {
+    color: rgb(100 116 139);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  dd {
+    color: rgb(15 23 42);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-top: 0.25rem;
+  }
+}
+
+.profile-page__note {
+  color: rgb(100 116 139);
+  font-size: 0.875rem;
+  margin-top: 1.5rem;
+}

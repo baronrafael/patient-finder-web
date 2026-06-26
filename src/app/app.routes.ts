@@ -7,6 +7,11 @@ export const routes: Routes = [
       import('./features/patient-search/patient-search.routes').then((m) => m.patientSearchRoutes),
   },
   {
+    path: 'admin',
+    loadChildren: () =>
+      import('./features/dashboard/dashboard.routes').then((m) => m.dashboardRoutes),
+  },
+  {
     path: '**',
     redirectTo: '',
   },

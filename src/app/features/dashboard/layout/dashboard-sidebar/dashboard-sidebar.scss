@@ -1,0 +1,33 @@
+.dashboard-sidebar {
+  border-bottom: 1px solid rgb(226 232 240 / 0.9);
+  background: white;
+  padding: 1rem;
+
+  @media (min-width: 1024px) {
+    border-bottom: 0;
+    border-right: 1px solid rgb(226 232 240 / 0.9);
+    min-height: 100dvh;
+    padding: 1.25rem 1rem;
+  }
+}
+
+.dashboard-sidebar__brand {
+  margin-bottom: 1rem;
+}
+
+.dashboard-sidebar__title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: rgb(15 23 42);
+}
+
+.dashboard-sidebar__nav {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+
+  @media (min-width: 1024px) {
+    flex-direction: column;
+    overflow-x: visible;
+  }
+}

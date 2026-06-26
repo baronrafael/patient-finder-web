@@ -13,11 +13,11 @@ import { disabled, form } from '@angular/forms/signals';
 import { Estado, Municipio, Parroquia } from '../../models/location.model';
 import { PatientFilters } from '../../models/patient-filters.model';
 import { PatientSex } from '../../models/patient-sex.model';
-import { FilterSelectField } from '../filter-select-field/filter-select-field';
+import { SelectField } from '../../../../shared/components/select-field/select-field';
 
 @Component({
   selector: 'app-patient-search-filters',
-  imports: [FilterSelectField],
+  imports: [SelectField],
   templateUrl: './patient-search-filters.html',
   styleUrl: './patient-search-filters.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

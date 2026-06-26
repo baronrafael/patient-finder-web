@@ -1,18 +1,18 @@
 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-  <app-filter-select-field label="Sexo" selectId="sex-filter" [field]="filterForm.sex">
+  <app-select-field label="Sexo" selectId="sex-filter" [field]="filterForm.sex">
     <option value="">Todos</option>
     <option value="m">Masculino</option>
     <option value="f">Femenino</option>
-  </app-filter-select-field>
+  </app-select-field>
 
-  <app-filter-select-field label="Estado" selectId="estado-filter" [field]="filterForm.estadoId">
+  <app-select-field label="Estado" selectId="estado-filter" [field]="filterForm.estadoId">
     <option value="">Todos los estados</option>
     @for (estado of estados(); track estado.id) {
       <option [value]="estado.id" [title]="estado.name">{{ estado.name }}</option>
     }
-  </app-filter-select-field>
+  </app-select-field>
 
-  <app-filter-select-field
+  <app-select-field
     label="Municipio"
     selectId="municipio-filter"
     [field]="filterForm.municipioId"
@@ -23,9 +23,9 @@
     @for (municipio of municipios(); track municipio.id) {
       <option [value]="municipio.id" [title]="municipio.name">{{ municipio.name }}</option>
     }
-  </app-filter-select-field>
+  </app-select-field>
 
-  <app-filter-select-field
+  <app-select-field
     label="Parroquia"
     selectId="parroquia-filter"
     [field]="filterForm.parroquiaId"
@@ -36,5 +36,5 @@
     @for (parroquia of parroquias(); track parroquia.id) {
       <option [value]="parroquia.id" [title]="parroquia.name">{{ parroquia.name }}</option>
     }
-  </app-filter-select-field>
+  </app-select-field>
 </div>

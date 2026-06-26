@@ -25,8 +25,8 @@
     @apply mt-1 text-xs text-slate-500;
   }
 
-  .filter-select-field {
-    @apply mt-2 min-h-11 w-full min-w-0 border-slate-300 bg-white text-sm;
+  .field-control {
+    @apply mt-2 min-h-11 w-full min-w-0 bg-white text-sm;
   }
 
   .btn-soft {
@@ -47,5 +47,37 @@
 
   .search-shell-input {
     @apply min-h-12 w-full bg-white pl-10 text-base;
+  }
+
+  .page-header {
+    @apply flex flex-wrap items-start justify-between gap-4;
+  }
+
+  .page-title {
+    @apply text-xl font-bold text-slate-900;
+  }
+
+  .page-subtitle {
+    @apply mt-1 text-sm text-slate-500;
+  }
+
+  .text-field {
+    @apply block w-full;
+  }
+
+  .form-stack {
+    @apply mt-6 grid gap-4;
+  }
+
+  .content-placeholder {
+    @apply mt-6 rounded-2xl border border-dashed border-slate-300 px-4 py-8 text-center text-sm text-slate-500;
+  }
+
+  .nav-link {
+    @apply rounded-xl px-3.5 py-2.5 text-sm font-semibold whitespace-nowrap text-slate-600 no-underline hover:bg-slate-100;
+  }
+
+  .nav-link-active {
+    @apply bg-teal-50 text-teal-700;
   }
 }

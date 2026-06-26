@@ -1,0 +1,14 @@
+<app-page-shell>
+  <app-page-header
+    title="Pacientes"
+    subtitle="Lista de registros digitalizados por centro."
+  >
+    @if (permissions.can('persons.create')) {
+      <a class="btn btn-primary" [routerLink]="paths.patientNew">Nuevo paciente</a>
+    }
+  </app-page-header>
+
+  <div class="content-placeholder">
+    <p>La tabla paginada y filtros se implementan en el siguiente ticket.</p>
+  </div>
+</app-page-shell>

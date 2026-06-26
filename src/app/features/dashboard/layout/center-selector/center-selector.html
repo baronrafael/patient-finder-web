@@ -1,0 +1,15 @@
+@if (showSelector()) {
+  <label class="center-selector">
+    <span class="field-label">Centro activo</span>
+    <select
+      class="select select-bordered select-sm field-control"
+      [value]="activeCenterId() ?? ''"
+      (change)="onCenterChange($event)"
+    >
+      <option value="">Todos los centros</option>
+      @for (center of centerOptions(); track center.id) {
+        <option [value]="center.id">{{ center.name }}</option>
+      }
+    </select>
+  </label>
+}
