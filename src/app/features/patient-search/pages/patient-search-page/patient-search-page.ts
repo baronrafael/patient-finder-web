@@ -393,10 +393,13 @@ export class PatientSearchPage {
 
           return this.repository.search(this.buildSearchQuery()).pipe(
             tap((searchResult) => {
-              this.result.set(searchResult);
+              this.applySearchResult(searchResult);
               this.lastUpdatedAt.set(searchResult.updatedAt);
             }),
             catchError((searchError: unknown) => {
+              if (this.page() > 1) {
+                this.page.update((page) => page - 1);
+              }
               this.error.set(mapHttpError(searchError));
               return EMPTY;
             }),
@@ -519,5 +522,26 @@ export class PatientSearchPage {
       page: this.page(),
       pageSize: PATIENT_SEARCH_PAGE_SIZE,
     };
+  }
+
+  private applySearchResult(searchResult: PatientSearchResult): void {
+    if (this.page() <= 1) {
+      this.result.set(searchResult);
+      return;
+    }
+
+    const previous = this.result();
+    if (!previous) {
+      this.result.set(searchResult);
+      return;
+    }
+
+    const seenIds = new Set(previous.items.map((item) => item.id));
+    const nextItems = searchResult.items.filter((item) => !seenIds.has(item.id));
+
+    this.result.set({
+      ...searchResult,
+      items: [...previous.items, ...nextItems],
+    });
   }
 }

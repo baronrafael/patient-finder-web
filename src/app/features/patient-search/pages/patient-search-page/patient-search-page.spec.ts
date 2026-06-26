@@ -8,19 +8,40 @@ import { PATIENT_REPOSITORY } from '../../data-access/patient-repository.token';
 import { PatientRepository } from '../../data-access/patient.repository';
 import { Hospital } from '../../models/hospital.model';
 import { Estado, Municipio, Parroquia } from '../../models/location.model';
+import { PatientRecord } from '../../models/patient-record.model';
 import { PatientSearchQuery } from '../../models/patient-search-query.model';
 import { PatientSearchResult } from '../../models/patient-search-result.model';
-import { PATIENT_SEARCH_DEBOUNCE_MS } from '../../utils/patient-search.constants';
+import { PATIENT_SEARCH_DEBOUNCE_MS, PATIENT_SEARCH_PAGE_SIZE } from '../../utils/patient-search.constants';
 import { PatientSearchPage } from './patient-search-page';
 
-const emptyResult: PatientSearchResult = {
-  items: [],
-  total: 0,
-  page: 1,
-  pageSize: 20,
-  hasMore: false,
-  updatedAt: '2026-06-25T20:00:00-04:00',
-};
+const updatedAt = '2026-06-25T20:00:00-04:00';
+
+function createPatient(id: string): PatientRecord {
+  return {
+    id,
+    sourceRow: 0,
+    fullName: `PACIENTE ${id}`,
+    age: null,
+    identityDocument: null,
+    phone: null,
+    address: null,
+    observations: null,
+    hospitalId: 'hospital-a',
+    hospitalName: 'Hospital A',
+    sourceHospitalName: 'Hospital A',
+  };
+}
+
+function createSearchResult(page: number, ids: readonly string[]): PatientSearchResult {
+  return {
+    items: ids.map(createPatient),
+    total: 40,
+    page,
+    pageSize: PATIENT_SEARCH_PAGE_SIZE,
+    hasMore: page < 2,
+    updatedAt,
+  };
+}
 
 class TestPatientRepository extends PatientRepository {
   searchCalls = 0;
@@ -45,7 +66,12 @@ class TestPatientRepository extends PatientRepository {
   override search(query: PatientSearchQuery): Observable<PatientSearchResult> {
     this.searchCalls += 1;
     this.lastQuery = query;
-    return of(emptyResult);
+
+    if (query.page === 1) {
+      return of(createSearchResult(1, ['1', '2']));
+    }
+
+    return of(createSearchResult(2, ['3', '4']));
   }
 }
 
@@ -165,5 +191,20 @@ describe('PatientSearchPage', () => {
         estadoId: 'miranda',
       }),
     );
+  });
+
+  it('appends results when loading more pages', async () => {
+    vi.useFakeTimers();
+    const page = createPage();
+
+    page.updateQuery('Garcia');
+    vi.advanceTimersByTime(PATIENT_SEARCH_DEBOUNCE_MS);
+    await vi.waitFor(() => expect(page.result()?.items).toHaveLength(2));
+
+    page.loadMore();
+    await vi.waitFor(() => expect(page.result()?.items).toHaveLength(4));
+
+    expect(page.result()?.items.map((patient) => patient.id)).toEqual(['1', '2', '3', '4']);
+    expect(repository.lastQuery?.page).toBe(2);
   });
 });

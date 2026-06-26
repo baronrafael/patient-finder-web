@@ -83,6 +83,31 @@ describe('searchPatients', () => {
     expect(result.items[0].identityDocument).toBeNull();
   });
 
+  it('paginates results by page slice', () => {
+    const manyPatients = Array.from({ length: 55 }, (_, index) =>
+      createPatient({
+        id: String(index + 1),
+        fullName: `GARCIA PACIENTE ${index + 1}`,
+      }),
+    );
+
+    const pageOne = searchPatients(manyPatients, query('garcia'), updatedAt);
+    const pageTwo = searchPatients(
+      manyPatients,
+      { ...query('garcia'), page: 2 },
+      updatedAt,
+    );
+
+    expect(pageOne.items).toHaveLength(30);
+    expect(pageOne.hasMore).toBe(true);
+    expect(pageTwo.items).toHaveLength(25);
+    expect(pageTwo.total).toBe(55);
+    expect(pageTwo.hasMore).toBe(false);
+    expect(pageOne.items.some((patient) => pageTwo.items.some((next) => next.id === patient.id))).toBe(
+      false,
+    );
+  });
+
   it('keeps the required hospital alias explicit', () => {
     expect(HOSPITAL_ALIASES['Hospital Universitario de Carac']).toBe(
       'Hospital Universitario de Caracas',

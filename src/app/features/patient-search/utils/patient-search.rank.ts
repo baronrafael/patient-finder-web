@@ -29,15 +29,15 @@ export function searchPatients(
       (a, b) => a.rank - b.rank || a.patient.fullName.localeCompare(b.patient.fullName, 'es-VE'),
     );
 
-  const visibleCount = query.page * query.pageSize;
-  const items = ranked.slice(0, visibleCount).map((match) => match.patient);
+  const start = (query.page - 1) * query.pageSize;
+  const items = ranked.slice(start, start + query.pageSize).map((match) => match.patient);
 
   return {
     items,
     total: ranked.length,
     page: query.page,
     pageSize: query.pageSize,
-    hasMore: ranked.length > visibleCount,
+    hasMore: start + query.pageSize < ranked.length,
     updatedAt,
   };
 }
