@@ -18,4 +18,18 @@ describe('highlightSearchText', () => {
   it('returns plain text when query is empty', () => {
     expect(highlightSearchText('GARCÍA MARÍA', '')).toEqual([{ text: 'GARCÍA MARÍA', highlight: false }]);
   });
+
+  it('preserves original text length when joining segments', () => {
+    const text = 'GARCÍA MARÍA';
+    const segments = highlightSearchText(text, 'garcia maria');
+
+    expect(segments.map((segment) => segment.text).join('')).toBe(text);
+  });
+
+  it('preserves formatted cedula when joining segments', () => {
+    const text = 'V-28.443.736';
+    const segments = highlightSearchText(text, '28443736');
+
+    expect(segments.map((segment) => segment.text).join('')).toBe(text);
+  });
 });

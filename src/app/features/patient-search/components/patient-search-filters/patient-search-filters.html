@@ -1,56 +1,40 @@
 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-  <div class="min-w-0">
-    <label class="field-label" for="sex-filter">Sexo</label>
-    <select id="sex-filter" class="filter-select filter-select-field select select-bordered" [formField]="filterForm.sex">
-      <option value="">Todos</option>
-      <option value="m">Masculino</option>
-      <option value="f">Femenino</option>
-    </select>
-  </div>
+  <app-filter-select-field label="Sexo" selectId="sex-filter" [field]="filterForm.sex">
+    <option value="">Todos</option>
+    <option value="m">Masculino</option>
+    <option value="f">Femenino</option>
+  </app-filter-select-field>
 
-  <div class="min-w-0">
-    <label class="field-label" for="estado-filter">Estado</label>
-    <select id="estado-filter" class="filter-select filter-select-field select select-bordered" [formField]="filterForm.estadoId">
-      <option value="">Todos los estados</option>
-      @for (estado of estados(); track estado.id) {
-        <option [value]="estado.id" [title]="estado.name">{{ estado.name }}</option>
-      }
-    </select>
-  </div>
-
-  <div class="min-w-0">
-    <label class="field-label" for="municipio-filter">Municipio</label>
-    <select
-      id="municipio-filter"
-      class="filter-select filter-select-field select select-bordered"
-      [formField]="filterForm.municipioId"
-      [attr.aria-describedby]="municipioDisabled() ? 'municipio-filter-hint' : null"
-    >
-      <option value="">Todos los municipios</option>
-      @for (municipio of municipios(); track municipio.id) {
-        <option [value]="municipio.id" [title]="municipio.name">{{ municipio.name }}</option>
-      }
-    </select>
-    @if (municipioDisabled()) {
-      <p id="municipio-filter-hint" class="field-hint">Selecciona un estado primero.</p>
+  <app-filter-select-field label="Estado" selectId="estado-filter" [field]="filterForm.estadoId">
+    <option value="">Todos los estados</option>
+    @for (estado of estados(); track estado.id) {
+      <option [value]="estado.id" [title]="estado.name">{{ estado.name }}</option>
     }
-  </div>
+  </app-filter-select-field>
 
-  <div class="min-w-0">
-    <label class="field-label" for="parroquia-filter">Parroquia</label>
-    <select
-      id="parroquia-filter"
-      class="filter-select filter-select-field select select-bordered"
-      [formField]="filterForm.parroquiaId"
-      [attr.aria-describedby]="parroquiaDisabled() ? 'parroquia-filter-hint' : null"
-    >
-      <option value="">Todas las parroquias</option>
-      @for (parroquia of parroquias(); track parroquia.id) {
-        <option [value]="parroquia.id" [title]="parroquia.name">{{ parroquia.name }}</option>
-      }
-    </select>
-    @if (parroquiaDisabled()) {
-      <p id="parroquia-filter-hint" class="field-hint">Selecciona un municipio primero.</p>
+  <app-filter-select-field
+    label="Municipio"
+    selectId="municipio-filter"
+    [field]="filterForm.municipioId"
+    [describedBy]="municipioDisabled() ? 'municipio-filter-hint' : null"
+    [hint]="municipioDisabled() ? 'Selecciona un estado primero.' : null"
+  >
+    <option value="">Todos los municipios</option>
+    @for (municipio of municipios(); track municipio.id) {
+      <option [value]="municipio.id" [title]="municipio.name">{{ municipio.name }}</option>
     }
-  </div>
+  </app-filter-select-field>
+
+  <app-filter-select-field
+    label="Parroquia"
+    selectId="parroquia-filter"
+    [field]="filterForm.parroquiaId"
+    [describedBy]="parroquiaDisabled() ? 'parroquia-filter-hint' : null"
+    [hint]="parroquiaDisabled() ? 'Selecciona un municipio primero.' : null"
+  >
+    <option value="">Todas las parroquias</option>
+    @for (parroquia of parroquias(); track parroquia.id) {
+      <option [value]="parroquia.id" [title]="parroquia.name">{{ parroquia.name }}</option>
+    }
+  </app-filter-select-field>
 </div>

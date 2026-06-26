@@ -111,41 +111,44 @@ describe('PatientSearchPage', () => {
 
   it('keeps location filters when typing a partial query', () => {
     const page = createPage();
+    const store = page.store;
 
-    page.updateFilters({
+    store.updateFilters({
       sex: null,
       estadoId: 'miranda',
       municipioId: 'chacao',
       parroquiaId: null,
     });
-    page.updateQuery('G');
+    store.updateQuery('G');
 
-    expect(page.selectedEstadoId()).toBe('miranda');
-    expect(page.selectedMunicipioId()).toBe('chacao');
+    expect(store.selectedEstadoId()).toBe('miranda');
+    expect(store.selectedMunicipioId()).toBe('chacao');
     expect(repository.searchCalls).toBe(1);
   });
 
   it('resets filters only when the query becomes empty', () => {
     const page = createPage();
+    const store = page.store;
 
-    page.updateFilters({
+    store.updateFilters({
       sex: null,
       estadoId: 'miranda',
       municipioId: null,
       parroquiaId: null,
     });
-    page.updateQuery('');
+    store.updateQuery('');
 
-    expect(page.selectedEstadoId()).toBeNull();
-    expect(page.query()).toBe('');
+    expect(store.selectedEstadoId()).toBeNull();
+    expect(store.query()).toBe('');
   });
 
   it('debounces text search until the debounce window passes', () => {
     vi.useFakeTimers();
     const page = createPage();
+    const store = page.store;
     const initialCalls = repository.searchCalls;
 
-    page.updateQuery('Garcia');
+    store.updateQuery('Garcia');
 
     expect(repository.searchCalls).toBe(initialCalls);
 
@@ -158,10 +161,11 @@ describe('PatientSearchPage', () => {
   it('runs submit immediately and cancels a pending debounced search', () => {
     vi.useFakeTimers();
     const page = createPage();
+    const store = page.store;
     const initialCalls = repository.searchCalls;
 
-    page.updateQuery('Garcia');
-    page.submitSearch();
+    store.updateQuery('Garcia');
+    store.submitSearch();
 
     expect(repository.searchCalls).toBe(initialCalls + 1);
 
@@ -173,14 +177,15 @@ describe('PatientSearchPage', () => {
   it('applies pending filters when the query becomes active', () => {
     vi.useFakeTimers();
     const page = createPage();
+    const store = page.store;
 
-    page.updateFilters({
+    store.updateFilters({
       sex: 'f',
       estadoId: 'miranda',
       municipioId: null,
       parroquiaId: null,
     });
-    page.updateQuery('Garcia');
+    store.updateQuery('Garcia');
 
     vi.advanceTimersByTime(PATIENT_SEARCH_DEBOUNCE_MS);
 
@@ -196,15 +201,16 @@ describe('PatientSearchPage', () => {
   it('appends results when loading more pages', async () => {
     vi.useFakeTimers();
     const page = createPage();
+    const store = page.store;
 
-    page.updateQuery('Garcia');
+    store.updateQuery('Garcia');
     vi.advanceTimersByTime(PATIENT_SEARCH_DEBOUNCE_MS);
-    await vi.waitFor(() => expect(page.result()?.items).toHaveLength(2));
+    await vi.waitFor(() => expect(store.result()?.items).toHaveLength(2));
 
-    page.loadMore();
-    await vi.waitFor(() => expect(page.result()?.items).toHaveLength(4));
+    store.loadMore();
+    await vi.waitFor(() => expect(store.result()?.items).toHaveLength(4));
 
-    expect(page.result()?.items.map((patient) => patient.id)).toEqual(['1', '2', '3', '4']);
+    expect(store.result()?.items.map((patient) => patient.id)).toEqual(['1', '2', '3', '4']);
     expect(repository.lastQuery?.page).toBe(2);
   });
 });

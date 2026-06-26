@@ -8,15 +8,16 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { FormField, disabled, form } from '@angular/forms/signals';
+import { disabled, form } from '@angular/forms/signals';
 
 import { Estado, Municipio, Parroquia } from '../../models/location.model';
 import { PatientFilters } from '../../models/patient-filters.model';
 import { PatientSex } from '../../models/patient-sex.model';
+import { FilterSelectField } from '../filter-select-field/filter-select-field';
 
 @Component({
   selector: 'app-patient-search-filters',
-  imports: [FormField],
+  imports: [FilterSelectField],
   templateUrl: './patient-search-filters.html',
   styleUrl: './patient-search-filters.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

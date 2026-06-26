@@ -2,22 +2,21 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
-  effect,
+  computed,
   inject,
   input,
   output,
   signal,
-  untracked,
 } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { FormField, disabled, form } from '@angular/forms/signals';
-import { distinctUntilChanged, filter, map } from 'rxjs';
+import { disabled, form } from '@angular/forms/signals';
 
 import { Hospital } from '../../models/hospital.model';
+import { FilterSelectField } from '../filter-select-field/filter-select-field';
+import { bindControlledField } from '../../utils/bind-controlled-field';
 
 @Component({
   selector: 'app-hospital-filter',
-  imports: [FormField],
+  imports: [FilterSelectField],
   templateUrl: './hospital-filter.html',
   styleUrl: './hospital-filter.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,24 +34,16 @@ export class HospitalFilter {
     disabled(path.hospitalId, () => this.disabled());
   });
 
-  constructor() {
-    effect(() => {
-      const hospitalId = this.selectedHospitalId() ?? '';
-      untracked(() => {
-        if (this.hospitalModel().hospitalId === hospitalId) {
-          return;
-        }
-        this.hospitalModel.set({ hospitalId });
-      });
-    });
+  readonly parentHospitalId = computed(() => this.selectedHospitalId() ?? '');
 
-    toObservable(this.hospitalModel)
-      .pipe(
-        map((model) => model.hospitalId || null),
-        distinctUntilChanged(),
-        filter((hospitalId) => hospitalId !== this.selectedHospitalId()),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe((hospitalId) => this.hospitalChange.emit(hospitalId));
+  constructor() {
+    bindControlledField({
+      destroyRef: this.destroyRef,
+      parentValue: this.parentHospitalId,
+      localModel: this.hospitalModel,
+      selectValue: (model) => model.hospitalId,
+      patchValue: (_model, hospitalId) => ({ hospitalId }),
+      emit: (hospitalId) => this.hospitalChange.emit(hospitalId || null),
+    });
   }
 }

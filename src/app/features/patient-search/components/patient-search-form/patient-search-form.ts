@@ -4,19 +4,16 @@ import {
   DestroyRef,
   afterNextRender,
   computed,
-  effect,
   inject,
   input,
   output,
   signal,
-  untracked,
 } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { FormField, form } from '@angular/forms/signals';
-import { distinctUntilChanged, filter, map } from 'rxjs';
 
 import { isSearchActive } from '../../utils/patient-search.matcher';
 import { PATIENT_SEARCH_MESSAGES } from '../../utils/patient-search.messages';
+import { bindControlledField } from '../../utils/bind-controlled-field';
+import { FormField, form } from '@angular/forms/signals';
 
 @Component({
   selector: 'app-patient-search-form',
@@ -57,24 +54,14 @@ export class PatientSearchForm {
       }
     });
 
-    effect(() => {
-      const query = this.query();
-      untracked(() => {
-        if (this.searchModel().query === query) {
-          return;
-        }
-        this.searchModel.set({ query });
-      });
+    bindControlledField({
+      destroyRef: this.destroyRef,
+      parentValue: this.query,
+      localModel: this.searchModel,
+      selectValue: (model) => model.query,
+      patchValue: (_model, query) => ({ query }),
+      emit: (query) => this.queryChange.emit(query),
     });
-
-    toObservable(this.searchModel)
-      .pipe(
-        map((model) => model.query),
-        distinctUntilChanged(),
-        filter((query) => query !== this.query()),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe((query) => this.queryChange.emit(query));
   }
 
   onClear(): void {

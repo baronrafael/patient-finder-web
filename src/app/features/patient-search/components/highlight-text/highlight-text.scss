@@ -1,7 +1,14 @@
+.highlight-text {
+  display: inline;
+}
+
 .search-highlight {
+  margin: 0;
+  padding: 0;
   border-radius: 0.125rem;
   background-color: rgb(254 243 199);
-  padding-inline: 0.125rem;
   font-weight: 600;
   color: inherit;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }

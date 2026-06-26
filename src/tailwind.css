@@ -36,4 +36,16 @@
   .hero-kicker {
     @apply text-xs font-semibold uppercase tracking-[0.14em] text-teal-700;
   }
+
+  .search-shell {
+    @apply relative;
+  }
+
+  .search-shell-icon {
+    @apply pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-slate-400;
+  }
+
+  .search-shell-input {
+    @apply min-h-12 w-full bg-white pl-10 text-base;
+  }
 }

@@ -1,4 +1,4 @@
-<app-header [updatedAt]="formattedUpdatedAt()" />
+<app-header [updatedAt]="store.formattedUpdatedAt()" />
 
 <a class="skip-link" href="#results-heading">Saltar a resultados</a>
 
@@ -18,50 +18,50 @@
 
       <div class="mt-5 grid gap-4">
         <app-patient-search-form
-          [query]="query()"
-          [loading]="loading()"
-          [pending]="searchPending()"
-          [slowSearch]="slowSearch()"
-          (queryChange)="updateQuery($event)"
-          (searchSubmit)="submitSearch()"
-          (clear)="clearSearch()"
+          [query]="store.query()"
+          [loading]="store.loading()"
+          [pending]="store.searchPending()"
+          [slowSearch]="store.slowSearch()"
+          (queryChange)="store.updateQuery($event)"
+          (searchSubmit)="store.submitSearch()"
+          (clear)="store.clearSearch()"
         />
 
-        @if (showMobileResultsJump()) {
-          <button class="btn btn-soft w-full lg:hidden" type="button" (click)="goToResults()">
-            {{ mobileResultsJumpLabel() }}
+        @if (store.showMobileResultsJump()) {
+          <button class="btn btn-soft w-full lg:hidden" type="button" (click)="store.goToResults()">
+            {{ store.mobileResultsJumpLabel() }}
           </button>
         }
 
         <app-optional-filters-panel
-          [expanded]="optionalFiltersExpanded()"
-          [activeFilterCount]="activeFilterChips().length"
-          [collapsedSummary]="collapsedFiltersSummary()"
-          [hasActiveFilters]="hasActiveFilters()"
-          [showHospitalFilter]="showHospitalFilter()"
-          [hospitals]="availableHospitals()"
-          [selectedHospitalId]="selectedHospitalId()"
-          [estados]="estados()"
-          [municipios]="municipios()"
-          [parroquias]="parroquias()"
-          [selectedSex]="selectedSex()"
-          [selectedEstadoId]="selectedEstadoId()"
-          [selectedMunicipioId]="selectedMunicipioId()"
-          [selectedParroquiaId]="selectedParroquiaId()"
-          (toggle)="toggleOptionalFilters()"
-          (hospitalChange)="updateHospital($event)"
-          (filtersChange)="updateFilters($event)"
+          [expanded]="store.optionalFiltersExpanded()"
+          [activeFilterCount]="store.activeFilterChips().length"
+          [collapsedSummary]="store.collapsedFiltersSummary()"
+          [hasActiveFilters]="store.hasActiveFilters()"
+          [showHospitalFilter]="store.showHospitalFilter()"
+          [hospitals]="store.availableHospitals()"
+          [selectedHospitalId]="store.selectedHospitalId()"
+          [estados]="store.estados()"
+          [municipios]="store.municipios()"
+          [parroquias]="store.parroquias()"
+          [selectedSex]="store.selectedSex()"
+          [selectedEstadoId]="store.selectedEstadoId()"
+          [selectedMunicipioId]="store.selectedMunicipioId()"
+          [selectedParroquiaId]="store.selectedParroquiaId()"
+          (toggle)="store.toggleOptionalFilters()"
+          (hospitalChange)="store.updateHospital($event)"
+          (filtersChange)="store.updateFilters($event)"
         />
 
-        @if (hasActiveFilters()) {
+        @if (store.hasActiveFilters()) {
           <app-patient-active-filters
-            [chips]="activeFilterChips()"
-            (chipRemove)="clearFilter($event)"
-            (clearAll)="clearAllFilters()"
+            [chips]="store.activeFilterChips()"
+            (chipRemove)="store.clearFilter($event)"
+            (clearAll)="store.clearAllFilters()"
           />
         }
 
-        @if (catalogError(); as catalogErrorMessage) {
+        @if (store.catalogError(); as catalogErrorMessage) {
           <div class="alert alert-error text-sm" role="alert">{{ catalogErrorMessage }}</div>
         }
       </div>
@@ -74,25 +74,25 @@
             clip-rule="evenodd"
           />
         </svg>
-        <p class="text-amber-950">{{ disclaimer }}</p>
+        <p class="text-amber-950">{{ store.disclaimer }}</p>
       </div>
     </section>
   </div>
 
   <app-patient-results-panel
-    [hasSearched]="hasSearched()"
-    [loading]="loading()"
-    [loadingMore]="loadingMore()"
-    [error]="error()"
-    [result]="result()"
-    [resultSummary]="resultSummary()"
-    [query]="query()"
-    [initialEmptyMessage]="initialEmptyMessage()"
-    [noResultsMessage]="noResultsMessage()"
-    [hasActiveFilters]="hasActiveFilters()"
-    (retry)="retry()"
-    (clearAllFilters)="clearAllFilters()"
-    (focusSearch)="focusSearchInput()"
-    (loadMore)="loadMore()"
+    [hasSearched]="store.hasSearched()"
+    [loading]="store.loading()"
+    [loadingMore]="store.loadingMore()"
+    [error]="store.error()"
+    [result]="store.result()"
+    [resultSummary]="store.resultSummary()"
+    [query]="store.query()"
+    [initialEmptyMessage]="store.initialEmptyMessage()"
+    [noResultsMessage]="store.noResultsMessage()"
+    [hasActiveFilters]="store.hasActiveFilters()"
+    (retry)="store.retry()"
+    (clearAllFilters)="store.clearAllFilters()"
+    (focusSearch)="store.focusSearchInput()"
+    (loadMore)="store.loadMore()"
   />
 </main>

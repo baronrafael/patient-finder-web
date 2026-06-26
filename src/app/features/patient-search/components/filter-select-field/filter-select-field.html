@@ -1,0 +1,14 @@
+<div class="min-w-0">
+  <label class="field-label" [for]="selectId()">{{ label() }}</label>
+  <select
+    [id]="selectId()"
+    class="filter-select filter-select-field select select-bordered"
+    [formField]="field()"
+    [attr.aria-describedby]="describedBy()"
+  >
+    <ng-content />
+  </select>
+  @if (hint()) {
+    <p [id]="describedBy()" class="field-hint">{{ hint() }}</p>
+  }
+</div>
