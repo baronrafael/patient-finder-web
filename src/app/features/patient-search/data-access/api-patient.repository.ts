@@ -45,37 +45,37 @@ interface ApiParishesResponseDto {
   };
 }
 
+interface ApiCenterDto {
+  readonly id: string;
+  readonly name: string;
+  readonly type?: string;
+  readonly contacts?: unknown;
+}
+
 interface ApiPersonDto {
   readonly id: string;
-  readonly fullName?: string;
-  readonly full_name?: string;
-  readonly name?: string;
-  readonly age?: string | number | null;
-  readonly identityDocument?: string | null;
-  readonly identity_document?: string | null;
+  readonly first_name?: string;
+  readonly last_name?: string;
   readonly cedula?: string | null;
-  readonly phone?: string | null;
-  readonly address?: string | null;
-  readonly observations?: string | null;
-  readonly hospital?: {
-    readonly id?: string;
-    readonly name?: string;
-  } | null;
-  readonly hospitalName?: string | null;
-  readonly hospital_name?: string | null;
+  readonly sex?: string | null;
+  readonly age_approx?: number | null;
+  readonly status?: string | null;
+  readonly admitted_at?: string | null;
+  readonly rescue_estado?: string | null;
+  readonly rescue_municipio?: string | null;
+  readonly rescue_parroquia?: string | null;
+  readonly center?: ApiCenterDto | null;
+  readonly notes?: string | null;
+  readonly contacts?: unknown;
+  readonly created_at?: string | null;
 }
 
 interface ApiPaginationDto {
-  readonly total?: number;
-  readonly page?: number;
-  readonly pageSize?: number;
+  readonly current_page?: number;
   readonly page_size?: number;
-  readonly hasMore?: boolean;
-  readonly has_more?: boolean;
-  readonly updatedAt?: string;
-  readonly updated_at?: string;
-  readonly datasetUpdatedAt?: string;
-  readonly dataset_updated_at?: string;
+  readonly first_page?: number;
+  readonly last_page?: number;
+  readonly total_records?: number;
 }
 
 interface ApiPersonSearchResponseDto {
@@ -153,6 +153,10 @@ export class ApiPatientRepository extends PatientRepository {
     if (query.parroquiaId) {
       params = params.set('parroquia_id', query.parroquiaId);
     }
+    if (query.page > 1) {
+      params = params.set('page', query.page);
+    }
+    params = params.set('page_size', query.pageSize);
 
     return this.http
       .get<ApiPersonSearchResponseDto>(`${this.config.apiBaseUrl}/persons/search`, { params })
@@ -166,19 +170,13 @@ function mapPersonSearchResponse(
 ): PatientSearchResult {
   const persons = response.data.persons ?? [];
   const pagination = response.pagination ?? {};
-  const pageSize = pagination.pageSize ?? pagination.page_size ?? query.pageSize;
-  const page = pagination.page ?? query.page;
-  const total = pagination.total ?? persons.length;
+  const page = pagination.current_page ?? query.page;
+  const pageSize = pagination.page_size ?? query.pageSize;
+  const total = pagination.total_records ?? persons.length;
   const hasMore =
-    pagination.hasMore ??
-    pagination.has_more ??
-    (pagination.total !== undefined ? page * pageSize < total : false);
+    pagination.last_page !== undefined ? page < pagination.last_page : page * pageSize < total;
   const updatedAt =
-    pagination.datasetUpdatedAt ??
-    pagination.dataset_updated_at ??
-    pagination.updatedAt ??
-    pagination.updated_at ??
-    new Date().toISOString();
+    persons.find((person) => person.created_at)?.created_at ?? new Date().toISOString();
 
   return {
     items: persons.map(mapPersonDto),
@@ -191,21 +189,87 @@ function mapPersonSearchResponse(
 }
 
 function mapPersonDto(person: ApiPersonDto): PatientRecord {
-  const hospitalName =
-    person.hospital?.name ?? person.hospitalName ?? person.hospital_name ?? 'Sin hospital';
+  const fullName = formatFullName(person);
+  const centerName = person.center?.name ?? 'Sin centro de atención';
 
   return {
     id: person.id,
     sourceRow: 0,
-    fullName: person.fullName ?? person.full_name ?? person.name ?? 'Sin nombre',
-    age: person.age == null ? null : String(person.age),
-    identityDocument:
-      person.identityDocument ?? person.identity_document ?? person.cedula ?? null,
-    phone: person.phone ?? null,
-    address: person.address ?? null,
-    observations: person.observations ?? null,
-    hospitalId: person.hospital?.id ?? 'unknown',
-    hospitalName,
-    sourceHospitalName: hospitalName,
+    fullName,
+    age: person.age_approx == null ? null : String(person.age_approx),
+    identityDocument: person.cedula?.trim() || null,
+    phone: formatContacts(person.contacts),
+    address: formatRescueLocation(person),
+    observations: formatObservations(person),
+    hospitalId: person.center?.id ?? 'unknown',
+    hospitalName: centerName,
+    sourceHospitalName: centerName,
   };
+}
+
+function formatFullName(person: ApiPersonDto): string {
+  const fullName = [person.first_name, person.last_name]
+    .filter((part) => part?.trim())
+    .join(' ')
+    .trim();
+
+  return fullName || 'Sin nombre';
+}
+
+function formatRescueLocation(person: ApiPersonDto): string | null {
+  const parts = [person.rescue_parroquia, person.rescue_municipio, person.rescue_estado]
+    .filter((part) => part?.trim())
+    .map((part) => part!.trim());
+
+  return parts.length > 0 ? parts.join(', ') : null;
+}
+
+function formatObservations(person: ApiPersonDto): string | null {
+  const notes = person.notes?.trim();
+  if (notes) {
+    return notes;
+  }
+
+  if (person.status?.trim()) {
+    return `Estado: ${formatStatus(person.status)}`;
+  }
+
+  return null;
+}
+
+function formatStatus(status: string): string {
+  switch (status) {
+    case 'hospitalized':
+      return 'Hospitalizado';
+    default:
+      return status.replaceAll('_', ' ');
+  }
+}
+
+function formatContacts(contacts: unknown): string | null {
+  if (contacts == null) {
+    return null;
+  }
+
+  if (typeof contacts === 'string') {
+    return contacts.trim() || null;
+  }
+
+  if (Array.isArray(contacts)) {
+    const values = contacts
+      .map((value) => (typeof value === 'string' ? value.trim() : String(value)))
+      .filter(Boolean);
+    return values.length > 0 ? values.join(' · ') : null;
+  }
+
+  if (typeof contacts === 'object') {
+    const record = contacts as Record<string, unknown>;
+    const values = ['phone', 'telefono', 'whatsapp', 'email']
+      .map((key) => record[key])
+      .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+      .map((value) => value.trim());
+    return values.length > 0 ? values.join(' · ') : null;
+  }
+
+  return null;
 }

@@ -236,6 +236,23 @@ export class PatientSearchPage {
     return `${result.total} coincidencia${result.total === 1 ? '' : 's'}`;
   });
 
+  readonly showMobileResultsJump = computed(
+    () => this.hasSearched() && !this.loading() && !this.searchPending(),
+  );
+
+  readonly mobileResultsJumpLabel = computed(() => {
+    if (this.error()) {
+      return 'Ir a resultados';
+    }
+
+    const result = this.result();
+    if (!result || result.total === 0) {
+      return 'Sin coincidencias — ver detalles';
+    }
+
+    return `Ir al listado (${result.total} coincidencia${result.total === 1 ? '' : 's'})`;
+  });
+
   constructor() {
     this.setupSearchPipeline();
     this.setupResultsScroll();
@@ -288,6 +305,7 @@ export class PatientSearchPage {
   submitSearch(): void {
     this.clearDebouncedSearch();
     this.page.set(1);
+    this.scrollToResultsAfterSearch.set(true);
     this.runSearch(true);
   }
 
@@ -344,7 +362,11 @@ export class PatientSearchPage {
   }
 
   focusSearchInput(): void {
-    document.getElementById('patient-search-query')?.focus();
+    document.getElementById('patient-search-query')?.focus({ preventScroll: true });
+  }
+
+  goToResults(): void {
+    this.scrollToResults();
   }
 
   private setupSearchPipeline(): void {
@@ -373,9 +395,6 @@ export class PatientSearchPage {
             tap((searchResult) => {
               this.result.set(searchResult);
               this.lastUpdatedAt.set(searchResult.updatedAt);
-              if (this.page() === 1) {
-                this.scrollToResultsAfterSearch.set(true);
-              }
             }),
             catchError((searchError: unknown) => {
               this.error.set(mapHttpError(searchError));

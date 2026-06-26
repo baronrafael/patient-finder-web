@@ -12,7 +12,7 @@ import {
   untracked,
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { FormField, disabled, form } from '@angular/forms/signals';
+import { FormField, form } from '@angular/forms/signals';
 import { distinctUntilChanged, filter, map } from 'rxjs';
 
 import { isSearchActive } from '../../utils/patient-search.matcher';
@@ -28,7 +28,7 @@ export class PatientSearchForm {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly query = input.required<string>();
-  readonly disabled = input(false);
+  readonly loading = input(false);
   readonly pending = input(false);
   readonly slowSearch = input(false);
 
@@ -37,9 +37,7 @@ export class PatientSearchForm {
   readonly clear = output<void>();
 
   readonly searchModel = signal({ query: '' });
-  readonly searchForm = form(this.searchModel, (path) => {
-    disabled(path.query, () => this.disabled());
-  });
+  readonly searchForm = form(this.searchModel);
 
   readonly canSubmit = computed(() => isSearchActive(this.searchModel().query));
 
@@ -77,6 +75,7 @@ export class PatientSearchForm {
     this.searchModel.set({ query: '' });
     this.queryChange.emit('');
     this.clear.emit();
+    this.focusQueryInput();
   }
 
   onSubmit(): void {
@@ -85,5 +84,12 @@ export class PatientSearchForm {
       this.queryChange.emit(query);
     }
     this.searchSubmit.emit();
+    this.focusQueryInput();
+  }
+
+  private focusQueryInput(): void {
+    requestAnimationFrame(() => {
+      document.getElementById('patient-search-query')?.focus({ preventScroll: true });
+    });
   }
 }
