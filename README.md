@@ -13,7 +13,7 @@ npm install
 npm start
 ```
 
-El repositorio ya incluye `public/data/patients.mock.json` y el Excel en `data-source/`, listos para desarrollo local sin pasos adicionales.
+El repositorio incluye `public/data/patients.mock.json`, listo para desarrollo local sin pasos adicionales. El Excel fuente no se versiona por privacidad.
 
 ## Stack
 
@@ -43,7 +43,7 @@ npm install
 
 ## Fuente de Datos
 
-Para actualizar el dataset, coloca el Excel en:
+El Excel consolidado **no está en el repositorio**. Para actualizar el dataset, solicítalo al equipo operativo y colócalo en:
 
 ```text
 data-source/25JUN26 8PM Pacientes Consolidados Hospitales Venezuela.xlsx
@@ -55,7 +55,7 @@ La hoja importada es:
 🔍 BUSCAR PACIENTES
 ```
 
-El archivo actual contiene 972 registros y fecha indicada `25JUN26 20:00`, hora de Venezuela.
+El dataset actual en `patients.mock.json` contiene 972 registros con fecha indicada `25JUN26 20:00`, hora de Venezuela.
 
 ## Importar Datos Mock
 
@@ -146,7 +146,7 @@ En producción con backend, la búsqueda debe ser server-side para no descargar 
 
 El sitio incluye `robots.txt` y meta `noindex,nofollow,noarchive` para reducir indexación accidental por buscadores.
 
-> **Privacidad:** este repositorio es público y contiene datos de pacientes en `public/data/` y `data-source/`. No compartas el enlace fuera del equipo operativo sin revisar esa exposición.
+> **Privacidad:** este repositorio es público y contiene datos de pacientes en `public/data/patients.mock.json`. El Excel fuente se mantiene fuera de git. No compartas el enlace fuera del equipo operativo sin revisar esa exposición.
 
 ## Contrato Backend Esperado
 
