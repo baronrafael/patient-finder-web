@@ -13,6 +13,10 @@ export const PATIENT_SEARCH_MESSAGES = {
   optionalFiltersHint: 'Hospital, sexo y ubicación',
   disclaimer:
     'Información consolidada de listados hospitalarios. Confirma directamente con el centro correspondiente antes de tomar decisiones.',
+  searchLinkCopied: 'Enlace copiado. Compártelo con tu familia.',
+  searchLinkCopyFailed: 'No se pudo copiar el enlace.',
+  copySearchLink: 'Copiar enlace',
+  noAdditionalDetails: 'Sin datos adicionales',
 } as const;
 
 export const PATIENT_SEX_LABELS = {

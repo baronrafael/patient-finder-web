@@ -1,6 +1,7 @@
 <app-header [updatedAt]="store.formattedUpdatedAt()" />
 
-<a class="skip-link" href="#results-heading">Saltar a resultados</a>
+<a class="skip-link" href="#patient-search-panel">Saltar al buscador</a>
+<a class="skip-link skip-link--results" href="#results-heading">Saltar a resultados</a>
 
 <main
   class="mx-auto grid w-full max-w-4xl grid-cols-1 gap-5 px-4 py-5 sm:px-6 sm:py-8 lg:max-w-6xl lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:items-start lg:gap-8 xl:grid-cols-[minmax(0,30rem)_minmax(0,1fr)]"
@@ -88,6 +89,9 @@
     [error]="store.error()"
     [result]="store.result()"
     [resultSummary]="store.resultSummary()"
+    [resultProgress]="store.resultProgress()"
+    [canShareSearchLink]="store.canShareSearchLink()"
+    [shareLinkFeedback]="store.shareLinkFeedback()"
     [query]="store.query()"
     [initialEmptyMessage]="store.initialEmptyMessage()"
     [noResultsMessage]="store.noResultsMessage()"
@@ -96,6 +100,7 @@
     (clearAllFilters)="store.clearAllFilters()"
     (focusSearch)="store.focusSearchInput()"
     (loadMore)="store.loadMore()"
+    (shareSearch)="store.copySearchLink()"
   />
 </main>
 

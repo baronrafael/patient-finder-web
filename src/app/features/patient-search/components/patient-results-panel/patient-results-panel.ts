@@ -4,6 +4,7 @@ import { EmptyState } from '../../../../shared/components/empty-state/empty-stat
 import { ErrorState } from '../../../../shared/components/error-state/error-state';
 import { LoadingSkeleton } from '../../../../shared/components/loading-skeleton/loading-skeleton';
 import { PatientSearchResult } from '../../models/patient-search-result.model';
+import { PATIENT_SEARCH_MESSAGES } from '../../utils/patient-search.messages';
 import { PatientResultsList } from '../patient-results-list/patient-results-list';
 
 @Component({
@@ -19,6 +20,9 @@ export class PatientResultsPanel {
   readonly error = input<string | null>(null);
   readonly result = input<PatientSearchResult | null>(null);
   readonly resultSummary = input('');
+  readonly resultProgress = input<string | null>(null);
+  readonly canShareSearchLink = input(false);
+  readonly shareLinkFeedback = input<string | null>(null);
   readonly query = input('');
   readonly initialEmptyTitle = input('Empieza una búsqueda');
   readonly initialEmptyMessage = input('');
@@ -30,4 +34,7 @@ export class PatientResultsPanel {
   readonly clearAllFilters = output<void>();
   readonly focusSearch = output<void>();
   readonly loadMore = output<void>();
+  readonly shareSearch = output<void>();
+
+  protected readonly copySearchLinkLabel = PATIENT_SEARCH_MESSAGES.copySearchLink;
 }

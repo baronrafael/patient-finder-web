@@ -7,12 +7,7 @@
   }
 
   <header class="patient-card__header">
-    <div
-      class="patient-card__avatar"
-      aria-hidden="true"
-      [style.background-color]="avatarColors().background"
-      [style.color]="avatarColors().color"
-    >
+    <div class="patient-card__avatar" aria-hidden="true">
       {{ initials() }}
     </div>
 
@@ -25,17 +20,32 @@
           <span class="patient-card__exact-badge">Coincidencia exacta</span>
         }
       </div>
-
-      <p class="patient-card__hospital">
-        <svg aria-hidden="true" class="patient-card__hospital-icon" viewBox="0 0 20 20" fill="currentColor">
-          <path
-            d="M9.75 2a.75.75 0 0 0-.75.75v1.5h-3A2.25 2.25 0 0 0 3.75 6.75v9.5A2.25 2.25 0 0 0 6 18.5h8a2.25 2.25 0 0 0 2.25-2.25v-9.5A2.25 2.25 0 0 0 14 4.25h-3v-1.5A.75.75 0 0 0 9.75 2Zm-1.5 4.5h3v8.25h-3V6.5Z"
-          />
-        </svg>
-        <span>{{ patient().hospitalName }}</span>
-      </p>
     </div>
   </header>
+
+  <div class="patient-card__location">
+    <div class="patient-card__location-mark" aria-hidden="true">
+      <svg class="patient-card__location-mark-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v3m0 0v3m0-3h3m-3 0H9" />
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M6 21V9.5L12 6l6 3.5V21M9 21v-5h6v5"
+        />
+      </svg>
+    </div>
+    <div class="patient-card__location-body">
+      <p class="patient-card__location-label">Atendido en</p>
+      <p class="patient-card__location-name" [title]="patient().hospitalName">
+        {{ patient().hospitalName }}
+      </p>
+      @if (showsSourceHospitalLabel()) {
+        <p class="patient-card__location-source">
+          Registrado como: {{ patient().sourceHospitalName }}
+        </p>
+      }
+    </div>
+  </div>
 
   <dl class="patient-card__facts">
     <div class="patient-card__fact patient-card__fact--primary">
@@ -134,54 +144,64 @@
   </footer>
 
   <div class="patient-card__secondary">
-    <button
-      class="patient-card__details-toggle"
-      type="button"
-      (click)="toggleDetails()"
-      [attr.aria-expanded]="detailsExpanded()"
-    >
-      {{ detailsExpanded() ? 'Ocultar datos adicionales' : 'Ver datos adicionales' }}
-      <svg
-        aria-hidden="true"
-        class="patient-card__details-chevron"
-        [class.patient-card__details-chevron--open]="detailsExpanded()"
-        viewBox="0 0 20 20"
-        fill="currentColor"
+    @if (hasSecondaryContent()) {
+      <button
+        class="patient-card__details-toggle"
+        type="button"
+        (click)="toggleDetails()"
+        [attr.aria-expanded]="detailsExpanded()"
       >
-        <path
-          fill-rule="evenodd"
-          d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z"
-          clip-rule="evenodd"
-        />
-      </svg>
-    </button>
-
-    @if (detailsExpanded()) {
-      <dl class="patient-card__secondary-details">
-        <div class="patient-card__secondary-item">
-          <dt>Dirección / procedencia</dt>
-          <dd>
-            @if (hasAddress()) {
-              {{ patient().address }}
-            } @else {
-              <span class="patient-card__fact-empty">{{ emptyLabels.address }}</span>
-            }
-          </dd>
-        </div>
-        <div
-          class="patient-card__secondary-item"
-          [class.patient-card__secondary-item--alert]="hasObservations()"
+        @if (hasObservations() && !detailsExpanded()) {
+          Incluye observaciones
+        } @else if (detailsExpanded()) {
+          Ocultar datos adicionales
+        } @else {
+          Ver datos adicionales
+        }
+        <svg
+          aria-hidden="true"
+          class="patient-card__details-chevron"
+          [class.patient-card__details-chevron--open]="detailsExpanded()"
+          viewBox="0 0 20 20"
+          fill="currentColor"
         >
-          <dt>Observaciones</dt>
-          <dd>
-            @if (hasObservations()) {
-              {{ patient().observations }}
-            } @else {
-              <span class="patient-card__fact-empty">{{ emptyLabels.observations }}</span>
-            }
-          </dd>
-        </div>
-      </dl>
+          <path
+            fill-rule="evenodd"
+            d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z"
+            clip-rule="evenodd"
+          />
+        </svg>
+      </button>
+
+      @if (detailsExpanded()) {
+        <dl class="patient-card__secondary-details">
+          <div class="patient-card__secondary-item">
+            <dt>Dirección / procedencia</dt>
+            <dd>
+              @if (hasAddress()) {
+                {{ patient().address }}
+              } @else {
+                <span class="patient-card__fact-empty">{{ emptyLabels.address }}</span>
+              }
+            </dd>
+          </div>
+          <div
+            class="patient-card__secondary-item"
+            [class.patient-card__secondary-item--alert]="hasObservations()"
+          >
+            <dt>Observaciones</dt>
+            <dd>
+              @if (hasObservations()) {
+                {{ patient().observations }}
+              } @else {
+                <span class="patient-card__fact-empty">{{ emptyLabels.observations }}</span>
+              }
+            </dd>
+          </div>
+        </dl>
+      }
+    } @else {
+      <p class="patient-card__secondary-empty">{{ noAdditionalDetailsLabel }}</p>
     }
   </div>
 </article>

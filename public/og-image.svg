@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="ogTitle ogDesc">
+  <title id="ogTitle">Buscador de pacientes  Sismo Venezuela 2026</title>
+  <desc id="ogDesc">Localiza familiares en hospitales y centros de atención</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc" />
+      <stop offset="100%" stop-color="#eef2f7" />
+    </linearGradient>
+    <linearGradient id="wave" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e2e8f0" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#cbd5e1" stop-opacity="0.15" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <path
+    fill="url(#wave)"
+    d="M720 420c120 40 260 20 480 80V630H0V500c140-60 300-40 420-80 90-30 190-10 300 0z"
+  />
+  <text
+    x="96"
+    y="168"
+    fill="#0f766e"
+    font-family="'Source Sans 3', 'Segoe UI', sans-serif"
+    font-size="28"
+    font-weight="700"
+    letter-spacing="0.14em"
+  >
+    SISMO VENEZUELA 2026
+  </text>
+  <text
+    x="96"
+    y="268"
+    fill="#020617"
+    font-family="'Source Sans 3', 'Segoe UI', sans-serif"
+    font-size="72"
+    font-weight="700"
+    letter-spacing="-0.02em"
+  >
+    Buscador de pacientes
+  </text>
+  <rect x="96" y="292" width="72" height="4" rx="2" fill="#0f766e" />
+  <text
+    x="96"
+    y="352"
+    fill="#475569"
+    font-family="'Source Sans 3', 'Segoe UI', sans-serif"
+    font-size="34"
+    font-weight="400"
+  >
+    Localiza familiares en hospitales y centros de atención
+  </text>
+  <rect x="96" y="430" width="720" height="88" rx="44" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" />
+  <circle cx="148" cy="474" r="18" fill="none" stroke="#0f766e" stroke-width="3" />
+  <line x1="160" y1="486" x2="172" y2="498" stroke="#0f766e" stroke-width="3" stroke-linecap="round" />
+  <text
+    x="188"
+    y="482"
+    fill="#94a3b8"
+    font-family="'Source Sans 3', 'Segoe UI', sans-serif"
+    font-size="30"
+  >
+    Nombre, apellido o cédula
+  </text>
+</svg>

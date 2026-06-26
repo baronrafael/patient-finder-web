@@ -36,7 +36,26 @@ describe('PatientResultCard', () => {
     expect(compiled.textContent).toContain('Edad');
     expect(compiled.textContent).toContain(PATIENT_FIELD_EMPTY_LABELS.age);
     expect(compiled.textContent).toContain('Sin teléfono registrado');
-    expect(compiled.textContent).toContain('Ver datos adicionales');
+    expect(compiled.textContent).toContain('Atendido en');
+    expect(compiled.textContent).toContain('Sin datos adicionales');
+  });
+
+  it('shows source hospital label when it differs from the canonical name', async () => {
+    const fixture = TestBed.createComponent(PatientResultCard);
+
+    fixture.componentRef.setInput(
+      'patient',
+      createPatient({
+        hospitalName: 'Hospital Central',
+        sourceHospitalName: 'HC DE CARACAS',
+      }),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Hospital Central');
+    expect(compiled.textContent).toContain('Registrado como: HC DE CARACAS');
   });
 
   it('shows contact actions and phone when available', async () => {
@@ -64,7 +83,12 @@ describe('PatientResultCard', () => {
   it('reveals secondary details with placeholders when expanded', async () => {
     const fixture = TestBed.createComponent(PatientResultCard);
 
-    fixture.componentRef.setInput('patient', createPatient());
+    fixture.componentRef.setInput(
+      'patient',
+      createPatient({
+        address: 'Caracas',
+      }),
+    );
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -75,11 +99,33 @@ describe('PatientResultCard', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    expect(compiled.textContent).toContain(PATIENT_FIELD_EMPTY_LABELS.address);
+    expect(compiled.textContent).toContain('Caracas');
     expect(compiled.textContent).toContain(PATIENT_FIELD_EMPTY_LABELS.observations);
   });
 
-  it('highlights observations when present in secondary details', async () => {
+  it('keeps secondary details collapsed until expanded', async () => {
+    const fixture = TestBed.createComponent(PatientResultCard);
+
+    fixture.componentRef.setInput(
+      'patient',
+      createPatient({
+        address: 'Caracas',
+        observations: 'Requiere seguimiento',
+      }),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).not.toContain('Caracas');
+    expect(compiled.textContent).not.toContain('Requiere seguimiento');
+    expect(compiled.textContent).toContain('Incluye observaciones');
+    expect(
+      compiled.querySelector<HTMLButtonElement>('.patient-card__details-toggle')?.getAttribute('aria-expanded'),
+    ).toBe('false');
+  });
+
+  it('highlights observations when secondary details are expanded', async () => {
     const fixture = TestBed.createComponent(PatientResultCard);
 
     fixture.componentRef.setInput(

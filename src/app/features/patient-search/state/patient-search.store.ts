@@ -8,6 +8,7 @@ import { APP_CONFIG } from '../../../core/config/app-config.token';
 import { ActiveFilterKey } from '../models/active-filter-chip.model';
 import { buildActiveFilterChips, summarizeFilterLabels } from '../utils/build-active-filter-chips';
 import { formatResultCount } from '../utils/format-result-count';
+import { formatResultProgress } from '../utils/format-result-progress';
 import { PATIENT_SEARCH_MESSAGES } from '../utils/patient-search.messages';
 import { PATIENT_REPOSITORY } from '../data-access/patient-repository.token';
 import { Hospital } from '../models/hospital.model';
@@ -48,6 +49,7 @@ export class PatientSearchStore {
   private searchFabMediaHandler: (() => void) | null = null;
   private searchFabScrollHandler: (() => void) | null = null;
   private mobileSearchFabInitialized = false;
+  private shareLinkFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly query = signal('');
   readonly selectedHospitalId = signal<string | null>(null);
@@ -220,11 +222,29 @@ export class PatientSearchStore {
     return formatResultCount(result.total);
   });
 
+  readonly resultProgress = computed(() => {
+    if (this.searchPending() || this.loading()) {
+      return null;
+    }
+
+    const result = this.result();
+    if (!this.hasSearched() || !result || result.total === 0) {
+      return null;
+    }
+
+    return formatResultProgress(result.items.length, result.total);
+  });
+
+  readonly canShareSearchLink = computed(
+    () => this.hasSearched() && isSearchActive(this.query()) && !this.loading() && !this.searchPending(),
+  );
+
   readonly showMobileResultsJump = computed(
     () => this.hasSearched() && !this.loading() && !this.searchPending(),
   );
 
   readonly showMobileSearchFab = signal(false);
+  readonly shareLinkFeedback = signal<string | null>(null);
 
   readonly mobileResultsJumpLabel = computed(() => {
     if (this.error()) {
@@ -249,6 +269,9 @@ export class PatientSearchStore {
       this.clearDebouncedSearch();
       this.clearSlowSearchTimer();
       this.teardownMobileSearchFab();
+      if (this.shareLinkFeedbackTimer !== null) {
+        clearTimeout(this.shareLinkFeedbackTimer);
+      }
     });
     this.loadDatasetMetadata();
     afterNextRender(() => this.setupMobileSearchFab());
@@ -389,6 +412,41 @@ export class PatientSearchStore {
       });
       requestAnimationFrame(() => this.focusSearchInput());
     });
+  }
+
+  async copySearchLink(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(this.buildShareableSearchUrl());
+      this.showShareLinkFeedback(PATIENT_SEARCH_MESSAGES.searchLinkCopied);
+    } catch {
+      this.showShareLinkFeedback(PATIENT_SEARCH_MESSAGES.searchLinkCopyFailed);
+    }
+  }
+
+  private showShareLinkFeedback(message: string): void {
+    if (this.shareLinkFeedbackTimer !== null) {
+      clearTimeout(this.shareLinkFeedbackTimer);
+    }
+
+    this.shareLinkFeedback.set(message);
+    this.shareLinkFeedbackTimer = setTimeout(() => {
+      this.shareLinkFeedback.set(null);
+      this.shareLinkFeedbackTimer = null;
+    }, 3000);
+  }
+
+  private buildShareableSearchUrl(): string {
+    const tree = this.router.createUrlTree([], {
+      relativeTo: this.route,
+      queryParams: serializePatientSearchUrlParams(this.buildSearchQuery()),
+    });
+    const path = this.router.serializeUrl(tree);
+
+    if (typeof window === 'undefined') {
+      return path;
+    }
+
+    return `${window.location.origin}${path}`;
   }
 
   private setupSearchPipeline(): void {
