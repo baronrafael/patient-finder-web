@@ -3,3 +3,37 @@
 @plugin "daisyui" {
   themes: light --default;
 }
+
+@layer components {
+  .panel {
+    @apply rounded-2xl border border-slate-200/90 bg-white shadow-sm;
+  }
+
+  .panel-compact {
+    @apply px-4 py-3 sm:px-5 sm:py-4;
+  }
+
+  .panel-padded {
+    @apply p-5 sm:p-6;
+  }
+
+  .field-label {
+    @apply text-sm font-semibold text-slate-800;
+  }
+
+  .field-hint {
+    @apply mt-1 text-xs text-slate-500;
+  }
+
+  .filter-select-field {
+    @apply mt-2 min-h-11 w-full min-w-0 border-slate-300 bg-white text-sm;
+  }
+
+  .btn-soft {
+    @apply btn btn-outline border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50;
+  }
+
+  .hero-kicker {
+    @apply text-xs font-semibold uppercase tracking-[0.14em] text-teal-700;
+  }
+}

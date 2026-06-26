@@ -47,10 +47,6 @@ export class PatientSearchFilters {
     disabled(path.parroquiaId, ({ valueOf }) => !valueOf(path.municipioId) || this.disabled());
   });
 
-  readonly availableMunicipios = computed(() => this.municipios());
-
-  readonly availableParroquias = computed(() => this.parroquias());
-
   readonly municipioDisabled = computed(() => this.disabled() || !this.filterModel().estadoId);
   readonly parroquiaDisabled = computed(() => this.disabled() || !this.filterModel().municipioId);
 
@@ -81,13 +77,13 @@ export class PatientSearchFilters {
       const model = this.filterModel();
       const sex = model.sex === 'm' || model.sex === 'f' ? model.sex : null;
       const estadoId = model.estadoId || null;
-      const municipios = this.availableMunicipios();
+      const municipios = this.municipios();
       const municipioId = model.municipioId || null;
       const validMunicipioId =
         municipioId && municipios.some((municipio) => municipio.id === municipioId)
           ? municipioId
           : null;
-      const parroquias = this.availableParroquias();
+      const parroquias = this.parroquias();
       const parroquiaId = model.parroquiaId || null;
       const validParroquiaId =
         parroquiaId && parroquias.some((parroquia) => parroquia.id === parroquiaId)

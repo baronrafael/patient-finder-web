@@ -1,0 +1,41 @@
+<section class="min-w-0 space-y-4" aria-labelledby="results-heading">
+  <div class="panel panel-compact lg:sticky lg:top-6 lg:z-10">
+    <div class="flex flex-wrap items-baseline justify-between gap-2">
+      <h2 id="results-heading" class="text-base font-bold text-slate-950 sm:text-lg">Resultados</h2>
+      @if (hasSearched() && result(); as searchResult) {
+        <span class="rounded-full bg-teal-50 px-2.5 py-0.5 text-sm font-medium text-teal-800">
+          {{ formatCount(searchResult.total) }}
+        </span>
+      }
+    </div>
+    <p class="mt-1 text-sm text-slate-600" aria-live="polite">{{ resultSummary() }}</p>
+  </div>
+
+  @if (error(); as errorMessage) {
+    <app-error-state [message]="errorMessage" (retry)="retry.emit()" />
+  } @else if (loading() && !loadingMore()) {
+    <app-loading-skeleton />
+  } @else if (!hasSearched()) {
+    <app-empty-state [title]="initialEmptyTitle()" [message]="initialEmptyMessage()">
+      @if (hasActiveFilters()) {
+        <button class="btn btn-soft btn-sm" type="button" (click)="clearAllFilters.emit()">Quitar filtros</button>
+      }
+      <button class="btn btn-soft btn-sm" type="button" (click)="focusSearch.emit()">Ir al buscador</button>
+    </app-empty-state>
+  } @else if (result()?.total === 0) {
+    <app-empty-state [title]="noResultsTitle()" [message]="noResultsMessage()">
+      @if (hasActiveFilters()) {
+        <button class="btn btn-soft btn-sm" type="button" (click)="clearAllFilters.emit()">Quitar filtros</button>
+      }
+      <button class="btn btn-soft btn-sm" type="button" (click)="focusSearch.emit()">Probar otra búsqueda</button>
+    </app-empty-state>
+  } @else if (result(); as searchResult) {
+    <app-patient-results-list
+      [patients]="searchResult.items"
+      [query]="query()"
+      [hasMore]="searchResult.hasMore"
+      [loadingMore]="loadingMore()"
+      (loadMore)="loadMore.emit()"
+    />
+  }
+</section>

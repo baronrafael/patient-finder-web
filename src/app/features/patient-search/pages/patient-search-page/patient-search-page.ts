@@ -15,15 +15,14 @@ import { EMPTY, Subject, catchError, finalize, of, switchMap, tap } from 'rxjs';
 import { mapHttpError } from '../../../../core/http/http-error.mapper';
 import { APP_CONFIG } from '../../../../core/config/app-config.token';
 import { AppHeader } from '../../../../shared/components/app-header/app-header';
-import { EmptyState } from '../../../../shared/components/empty-state/empty-state';
-import { ErrorState } from '../../../../shared/components/error-state/error-state';
-import { LoadingSkeleton } from '../../../../shared/components/loading-skeleton/loading-skeleton';
-import { ActiveFilterChip, ActiveFilterKey } from '../../models/active-filter-chip.model';
-import { HospitalFilter } from '../../components/hospital-filter/hospital-filter';
+import { OptionalFiltersPanel } from '../../components/optional-filters-panel/optional-filters-panel';
 import { PatientActiveFilters } from '../../components/patient-active-filters/patient-active-filters';
-import { PatientResultsList } from '../../components/patient-results-list/patient-results-list';
-import { PatientSearchFilters } from '../../components/patient-search-filters/patient-search-filters';
+import { PatientResultsPanel } from '../../components/patient-results-panel/patient-results-panel';
 import { PatientSearchForm } from '../../components/patient-search-form/patient-search-form';
+import { ActiveFilterKey } from '../../models/active-filter-chip.model';
+import { buildActiveFilterChips, summarizeFilterLabels } from '../../utils/build-active-filter-chips';
+import { formatResultCount } from '../../utils/format-result-count';
+import { PATIENT_SEARCH_MESSAGES } from '../../utils/patient-search.messages';
 import { PATIENT_REPOSITORY } from '../../data-access/patient-repository.token';
 import { Hospital } from '../../models/hospital.model';
 import { Estado, Municipio, Parroquia } from '../../models/location.model';
@@ -42,13 +41,9 @@ import { PATIENT_SEARCH_DEBOUNCE_MS, PATIENT_SEARCH_PAGE_SIZE, SLOW_SEARCH_THRES
   selector: 'app-patient-search-page',
   imports: [
     AppHeader,
-    EmptyState,
-    ErrorState,
-    HospitalFilter,
-    LoadingSkeleton,
+    OptionalFiltersPanel,
     PatientActiveFilters,
-    PatientResultsList,
-    PatientSearchFilters,
+    PatientResultsPanel,
     PatientSearchForm,
   ],
   templateUrl: './patient-search-page.html',
@@ -156,76 +151,34 @@ export class PatientSearchPage {
     }).format(new Date(updatedAt));
   });
 
-  readonly activeFilterChips = computed(() => {
-    const chips: ActiveFilterChip[] = [];
-
-    const hospitalId = this.selectedHospitalId();
-    if (hospitalId) {
-      const hospital = this.hospitals().find((item) => item.id === hospitalId);
-      if (hospital) {
-        chips.push({ key: 'hospital', label: hospital.name });
-      }
-    }
-
-    const sex = this.selectedSex();
-    if (sex === 'm') {
-      chips.push({ key: 'sex', label: 'Masculino' });
-    }
-    if (sex === 'f') {
-      chips.push({ key: 'sex', label: 'Femenino' });
-    }
-
-    const estadoId = this.selectedEstadoId();
-    if (estadoId) {
-      const estado = this.estados().find((item) => item.id === estadoId);
-      if (estado) {
-        chips.push({ key: 'estado', label: estado.name });
-
-        const municipioId = this.selectedMunicipioId();
-        if (municipioId) {
-          const municipio = this.municipios().find((item) => item.id === municipioId);
-          if (municipio) {
-            chips.push({ key: 'municipio', label: municipio.name });
-
-            const parroquiaId = this.selectedParroquiaId();
-            if (parroquiaId) {
-              const parroquia = this.parroquias().find((item) => item.id === parroquiaId);
-              if (parroquia) {
-                chips.push({ key: 'parroquia', label: parroquia.name });
-              }
-            }
-          }
-        }
-      }
-    }
-
-    return chips;
-  });
+  readonly activeFilterChips = computed(() =>
+    buildActiveFilterChips({
+      hospitals: this.hospitals(),
+      estados: this.estados(),
+      municipios: this.municipios(),
+      parroquias: this.parroquias(),
+      hospitalId: this.selectedHospitalId(),
+      sex: this.selectedSex(),
+      estadoId: this.selectedEstadoId(),
+      municipioId: this.selectedMunicipioId(),
+      parroquiaId: this.selectedParroquiaId(),
+    }),
+  );
 
   readonly hasActiveFilters = computed(() => this.activeFilterChips().length > 0);
 
-  readonly collapsedFiltersSummary = computed(() => {
-    const labels = this.activeFilterChips().map((chip) => chip.label);
-    if (!labels.length) {
-      return null;
-    }
+  readonly collapsedFiltersSummary = computed(() => summarizeFilterLabels(this.activeFilterChips()));
 
-    const joined = labels.join(' · ');
-    return joined.length > 52 ? `${joined.slice(0, 49)}…` : joined;
-  });
-
-  readonly initialEmptyMessage = computed(() => {
-    if (this.hasActiveFilters()) {
-      return 'Tienes filtros seleccionados. Escribe al menos dos letras del nombre o cuatro dígitos de la cédula para buscar.';
-    }
-
-    return 'Escribe al menos dos letras del nombre o cuatro dígitos de la cédula. No mostramos todos los registros al entrar.';
-  });
+  readonly initialEmptyMessage = computed(() =>
+    this.hasActiveFilters()
+      ? PATIENT_SEARCH_MESSAGES.filtersWithQueryPending
+      : PATIENT_SEARCH_MESSAGES.searchHintNoBrowse,
+  );
 
   readonly noResultsMessage = computed(() => {
     const chips = this.activeFilterChips();
     if (chips.length === 0) {
-      return 'Revisa la escritura o prueba solo con un apellido.';
+      return PATIENT_SEARCH_MESSAGES.noResultsBase;
     }
 
     const filterLabels = chips.map((chip) => chip.label).join(' · ');
@@ -234,21 +187,21 @@ export class PatientSearchPage {
 
   readonly resultSummary = computed(() => {
     if (this.searchPending()) {
-      return 'Preparando búsqueda...';
+      return PATIENT_SEARCH_MESSAGES.preparingSearch;
     }
 
     if (this.loading()) {
-      return 'Cargando resultados...';
+      return PATIENT_SEARCH_MESSAGES.loadingResults;
     }
 
     const result = this.result();
     if (!this.hasSearched() || !result) {
       return this.hasActiveFilters()
-        ? 'Filtros listos. Escribe para buscar.'
-        : 'Sin búsqueda activa.';
+        ? PATIENT_SEARCH_MESSAGES.filtersReady
+        : PATIENT_SEARCH_MESSAGES.noActiveSearch;
     }
 
-    return `${result.total} coincidencia${result.total === 1 ? '' : 's'}`;
+    return formatResultCount(result.total);
   });
 
   readonly showMobileResultsJump = computed(
@@ -265,8 +218,10 @@ export class PatientSearchPage {
       return 'Sin coincidencias — ver detalles';
     }
 
-    return `Ir al listado (${result.total} coincidencia${result.total === 1 ? '' : 's'})`;
+    return `Ir al listado (${formatResultCount(result.total)})`;
   });
+
+  readonly disclaimer = PATIENT_SEARCH_MESSAGES.disclaimer;
 
   constructor() {
     this.setupSearchPipeline();

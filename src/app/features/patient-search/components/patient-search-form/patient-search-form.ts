@@ -16,6 +16,7 @@ import { FormField, form } from '@angular/forms/signals';
 import { distinctUntilChanged, filter, map } from 'rxjs';
 
 import { isSearchActive } from '../../utils/patient-search.matcher';
+import { PATIENT_SEARCH_MESSAGES } from '../../utils/patient-search.messages';
 
 @Component({
   selector: 'app-patient-search-form',
@@ -40,6 +41,11 @@ export class PatientSearchForm {
   readonly searchForm = form(this.searchModel);
 
   readonly canSubmit = computed(() => isSearchActive(this.searchModel().query));
+
+  readonly searchHint = PATIENT_SEARCH_MESSAGES.searchHint;
+  readonly preparingSearchMessage = PATIENT_SEARCH_MESSAGES.preparingSearch;
+  readonly loadingResultsMessage = PATIENT_SEARCH_MESSAGES.loadingResults;
+  readonly slowSearchMessage = PATIENT_SEARCH_MESSAGES.slowConnection;
 
   constructor() {
     afterNextRender(() => {

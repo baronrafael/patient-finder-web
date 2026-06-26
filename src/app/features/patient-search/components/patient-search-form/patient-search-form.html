@@ -1,7 +1,5 @@
 <form class="search-form space-y-2" (submit)="$event.preventDefault(); onSubmit()">
-  <label class="text-sm font-semibold text-slate-800" for="patient-search-query"
-    >Nombre, apellido o cédula</label
-  >
+  <label class="field-label" for="patient-search-query">Nombre, apellido o cédula</label>
   <div class="search-bar flex flex-col gap-2">
     <input
       id="patient-search-query"
@@ -14,7 +12,7 @@
     />
     <div class="flex gap-2">
       <button
-        class="btn btn-primary min-h-12 flex-1 px-4 sm:flex-none"
+        class="btn btn-primary min-h-12 flex-1 px-4 shadow-sm sm:flex-none"
         type="submit"
         [disabled]="loading() || pending() || !canSubmit()"
       >
@@ -22,7 +20,7 @@
       </button>
       @if (searchModel().query) {
         <button
-          class="btn btn-outline min-h-12 border-slate-300 px-4"
+          class="btn btn-soft min-h-12 px-4"
           type="button"
           (click)="onClear()"
           aria-label="Limpiar búsqueda"
@@ -33,21 +31,17 @@
     </div>
   </div>
   @if (slowSearch()) {
-    <p class="text-xs text-amber-700" aria-live="polite">
-      La conexión parece lenta. Seguimos buscando...
-    </p>
+    <p class="text-xs text-amber-700" aria-live="polite">{{ slowSearchMessage }}</p>
   } @else if (pending() || loading()) {
     <p class="flex items-center gap-2 text-xs text-slate-600" aria-live="polite">
       <span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
       @if (pending()) {
-        Preparando búsqueda...
+        {{ preparingSearchMessage }}
       } @else {
-        Buscando...
+        {{ loadingResultsMessage }}
       }
     </p>
   } @else {
-    <p class="text-xs leading-5 text-slate-500">
-      Escribe al menos dos letras del nombre o cuatro dígitos de la cédula.
-    </p>
+    <p class="text-xs leading-5 text-slate-500">{{ searchHint }}</p>
   }
 </form>

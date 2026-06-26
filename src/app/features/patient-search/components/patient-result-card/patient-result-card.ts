@@ -2,6 +2,10 @@ import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, input
 
 import { buildWhatsAppHref } from '../../../../core/utils/phone-links';
 import { PatientRecord } from '../../models/patient-record.model';
+import {
+  buildPatientContactSummary,
+  buildPatientShareSummary,
+} from '../../utils/build-patient-contact-summary';
 import { isExactDocumentMatch } from '../../utils/patient-search.matcher';
 import { HighlightText } from '../highlight-text/highlight-text';
 
@@ -60,28 +64,12 @@ export class PatientResultCard {
   }
 
   async copyContactDetails(): Promise<void> {
-    const patient = this.patient();
-    const lines = [
-      patient.fullName,
-      patient.hospitalName,
-      patient.identityDocument ? `Cédula: ${patient.identityDocument}` : null,
-      patient.phone ? `Teléfono: ${patient.phone}` : null,
-      patient.address ? `Dirección: ${patient.address}` : null,
-    ].filter((line): line is string => Boolean(line));
-
-    await this.copyText(lines.join('\n'), 'Datos copiados');
+    await this.copyText(buildPatientContactSummary(this.patient()), 'Datos copiados');
   }
 
   async shareContactDetails(): Promise<void> {
     const patient = this.patient();
-    const text = [
-      patient.fullName,
-      patient.hospitalName,
-      patient.identityDocument ? `Cédula: ${patient.identityDocument}` : null,
-      patient.phone ? `Teléfono: ${patient.phone}` : null,
-    ]
-      .filter((line): line is string => Boolean(line))
-      .join('\n');
+    const text = buildPatientShareSummary(patient);
 
     if (!this.canShare()) {
       await this.copyText(text, 'Datos copiados');
