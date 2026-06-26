@@ -38,7 +38,7 @@
   }
 
   .search-shell {
-    @apply relative;
+    @apply relative w-full min-w-0;
   }
 
   .search-shell-icon {

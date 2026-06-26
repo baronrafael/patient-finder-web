@@ -38,32 +38,54 @@
 
   @if (expanded()) {
     <div id="optional-filters-panel" class="border-t border-slate-200 bg-white p-4">
-      @if (showHospitalFilter()) {
-        <app-hospital-filter
-          [hospitals]="hospitals()"
-          [selectedHospitalId]="selectedHospitalId()"
-          (hospitalChange)="hospitalChange.emit($event)"
-        />
-      }
+      @if (catalogLoading()) {
+        <div
+          class="grid gap-4 py-1"
+          aria-busy="true"
+          aria-live="polite"
+          aria-label="Cargando filtros"
+        >
+          <div class="space-y-2">
+            <div class="skeleton h-3 w-28 rounded"></div>
+            <div class="skeleton h-12 w-full rounded-lg"></div>
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+            @for (item of [1, 2, 3, 4]; track item) {
+              <div class="space-y-2">
+                <div class="skeleton h-3 w-16 rounded"></div>
+                <div class="skeleton h-12 w-full rounded-lg"></div>
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
+        @if (showHospitalFilter()) {
+          <app-hospital-filter
+            [hospitals]="hospitals()"
+            [selectedHospitalId]="selectedHospitalId()"
+            (hospitalChange)="hospitalChange.emit($event)"
+          />
+        }
 
-      <div
-        class="mt-4 border-t border-slate-100 pt-4"
-        [class.mt-0]="!showHospitalFilter()"
-        [class.border-t-0]="!showHospitalFilter()"
-        [class.pt-0]="!showHospitalFilter()"
-      >
-        <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Ubicación y sexo</p>
-        <app-patient-search-filters
-          [estados]="estados()"
-          [municipios]="municipios()"
-          [parroquias]="parroquias()"
-          [selectedSex]="selectedSex()"
-          [selectedEstadoId]="selectedEstadoId()"
-          [selectedMunicipioId]="selectedMunicipioId()"
-          [selectedParroquiaId]="selectedParroquiaId()"
-          (filtersChange)="filtersChange.emit($event)"
-        />
-      </div>
+        <div
+          class="mt-4 border-t border-slate-100 pt-4"
+          [class.mt-0]="!showHospitalFilter()"
+          [class.border-t-0]="!showHospitalFilter()"
+          [class.pt-0]="!showHospitalFilter()"
+        >
+          <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Ubicación y sexo</p>
+          <app-patient-search-filters
+            [estados]="estados()"
+            [municipios]="municipios()"
+            [parroquias]="parroquias()"
+            [selectedSex]="selectedSex()"
+            [selectedEstadoId]="selectedEstadoId()"
+            [selectedMunicipioId]="selectedMunicipioId()"
+            [selectedParroquiaId]="selectedParroquiaId()"
+            (filtersChange)="filtersChange.emit($event)"
+          />
+        </div>
+      }
     </div>
   }
 </div>

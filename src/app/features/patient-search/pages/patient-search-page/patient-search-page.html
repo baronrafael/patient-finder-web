@@ -3,10 +3,11 @@
 <a class="skip-link" href="#results-heading">Saltar a resultados</a>
 
 <main
-  class="mx-auto grid w-full max-w-4xl grid-cols-1 gap-5 px-4 py-5 sm:px-6 sm:py-8 lg:max-w-6xl lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:items-start lg:gap-8 xl:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]"
+  class="mx-auto grid w-full max-w-4xl grid-cols-1 gap-5 px-4 py-5 sm:px-6 sm:py-8 lg:max-w-6xl lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:items-start lg:gap-8 xl:grid-cols-[minmax(0,30rem)_minmax(0,1fr)]"
+  [class.pb-24]="showMobileSearchFab()"
 >
   <div class="contents lg:block">
-    <section class="panel panel-padded lg:sticky lg:top-6">
+    <section id="patient-search-panel" class="panel panel-padded lg:sticky lg:top-6">
       <div class="space-y-2">
         <p class="hero-kicker">Búsqueda de familiares</p>
         <h2 class="text-xl font-bold text-slate-950 sm:text-2xl">Encuentra a tu familiar</h2>
@@ -35,6 +36,7 @@
 
         <app-optional-filters-panel
           [expanded]="store.optionalFiltersExpanded()"
+          [catalogLoading]="store.filtersCatalogLoading()"
           [activeFilterCount]="store.activeFilterChips().length"
           [collapsedSummary]="store.collapsedFiltersSummary()"
           [hasActiveFilters]="store.hasActiveFilters()"
@@ -96,3 +98,23 @@
     (loadMore)="store.loadMore()"
   />
 </main>
+
+@if (showMobileSearchFab()) {
+  <div class="search-fab-shell lg:hidden" aria-hidden="false">
+    <button
+      class="search-fab btn btn-primary shadow-lg"
+      type="button"
+      (click)="store.goToSearch()"
+      aria-label="Volver al buscador"
+    >
+      <svg aria-hidden="true" class="size-5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+        <path
+          fill-rule="evenodd"
+          d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+      Buscar
+    </button>
+  </div>
+}

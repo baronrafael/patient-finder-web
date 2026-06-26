@@ -1,7 +1,7 @@
 <form class="search-form space-y-2" (submit)="$event.preventDefault(); onSubmit()">
   <label class="field-label" for="patient-search-query">Nombre, apellido o cédula</label>
-  <div class="search-bar flex flex-col gap-2">
-    <div class="search-shell">
+  <div class="search-bar flex w-full flex-col gap-2">
+    <div class="search-shell w-full min-w-0">
       <svg class="search-shell-icon" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
         <path
           fill-rule="evenodd"
@@ -11,7 +11,7 @@
       </svg>
       <input
         id="patient-search-query"
-        class="search-input search-shell-input input input-bordered"
+        class="search-input search-shell-input input input-bordered min-h-12 w-full min-w-0 bg-white text-base"
         type="search"
         autocomplete="off"
         inputmode="search"

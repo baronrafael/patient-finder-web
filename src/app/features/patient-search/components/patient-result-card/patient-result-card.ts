@@ -6,6 +6,7 @@ import {
   buildPatientContactSummary,
   buildPatientShareSummary,
 } from '../../utils/build-patient-contact-summary';
+import { getHospitalAvatarColors, getPatientInitials } from '../../utils/patient-card.presenter';
 import { isExactDocumentMatch } from '../../utils/patient-search.matcher';
 import { HighlightText } from '../highlight-text/highlight-text';
 
@@ -22,6 +23,12 @@ export class PatientResultCard {
 
   readonly patient = input.required<PatientRecord>();
   readonly query = input('');
+
+  readonly detailsExpanded = signal(false);
+
+  readonly initials = computed(() => getPatientInitials(this.patient().fullName));
+
+  readonly avatarColors = computed(() => getHospitalAvatarColors(this.patient().hospitalId));
 
   readonly phoneHref = computed(() => {
     const phone = this.patient().phone;
@@ -40,11 +47,25 @@ export class PatientResultCard {
 
   readonly isExactDocumentMatch = computed(() => isExactDocumentMatch(this.patient(), this.query()));
 
+  readonly hasContact = computed(() => Boolean(this.patient().phone));
+
+  readonly hasFacts = computed(
+    () => Boolean(this.patient().age || this.patient().identityDocument),
+  );
+
+  readonly hasSecondaryDetails = computed(
+    () => Boolean(this.patient().address || this.patient().observations),
+  );
+
   readonly canShare = computed(
     () => typeof navigator !== 'undefined' && typeof navigator.share === 'function',
   );
 
   readonly copyFeedback = signal<string | null>(null);
+
+  readonly callAriaLabel = computed(() => `Llamar a ${this.patient().fullName}`);
+
+  readonly whatsAppAriaLabel = computed(() => `Enviar WhatsApp a ${this.patient().fullName}`);
 
   constructor() {
     this.destroyRef.onDestroy(() => {
@@ -52,6 +73,10 @@ export class PatientResultCard {
         clearTimeout(this.copyFeedbackTimer);
       }
     });
+  }
+
+  toggleDetails(): void {
+    this.detailsExpanded.update((expanded) => !expanded);
   }
 
   async copyIdentityDocument(): Promise<void> {
@@ -108,6 +133,6 @@ export class PatientResultCard {
     this.copyFeedbackTimer = setTimeout(() => {
       this.copyFeedback.set(null);
       this.copyFeedbackTimer = null;
-    }, 2000);
+    }, 2500);
   }
 }

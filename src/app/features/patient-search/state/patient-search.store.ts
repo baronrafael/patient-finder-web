@@ -1,4 +1,4 @@
-import { DestroyRef, Injectable, computed, effect, inject, linkedSignal, signal, untracked } from '@angular/core';
+import { DestroyRef, Injectable, afterNextRender, computed, effect, inject, linkedSignal, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed, rxResource } from '@angular/core/rxjs-interop';
 import { EMPTY, Subject, catchError, finalize, of, switchMap, tap } from 'rxjs';
 
@@ -35,6 +35,10 @@ export class PatientSearchStore {
   private queryDebounceTimer: ReturnType<typeof setTimeout> | null = null;
   private slowSearchTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly scrollToResultsAfterSearch = signal(false);
+  private searchFabMediaQuery: MediaQueryList | null = null;
+  private searchFabMediaHandler: (() => void) | null = null;
+  private searchFabScrollHandler: (() => void) | null = null;
+  private mobileSearchFabInitialized = false;
 
   readonly query = signal('');
   readonly selectedHospitalId = signal<string | null>(null);
@@ -54,41 +58,62 @@ export class PatientSearchStore {
   readonly slowSearch = signal(false);
   readonly searchPending = signal(false);
   readonly optionalFiltersExpanded = signal(false);
+  readonly filtersCatalogLoaded = signal(false);
   readonly error = signal<string | null>(null);
   readonly result = signal<PatientSearchResult | null>(null);
   readonly hasSearched = signal(false);
   readonly lastUpdatedAt = signal<string | null>(null);
 
   readonly hospitalsResource = rxResource({
-    stream: () => this.repository.getHospitals(),
+    params: () => this.filtersCatalogLoaded(),
+    stream: ({ params: loadCatalog }) => {
+      if (!loadCatalog) {
+        return of([] as readonly Hospital[]);
+      }
+
+      return this.repository.getHospitals();
+    },
     defaultValue: [] as readonly Hospital[],
   });
 
   readonly estadosResource = rxResource({
-    stream: () => this.repository.getEstados(),
+    params: () => this.filtersCatalogLoaded(),
+    stream: ({ params: loadCatalog }) => {
+      if (!loadCatalog) {
+        return of([] as readonly Estado[]);
+      }
+
+      return this.repository.getEstados();
+    },
     defaultValue: [] as readonly Estado[],
   });
 
   readonly municipiosResource = rxResource({
-    params: () => this.selectedEstadoId(),
-    stream: ({ params: estadoId }) => {
-      if (!estadoId) {
+    params: () => ({
+      loadCatalog: this.filtersCatalogLoaded(),
+      estadoId: this.selectedEstadoId(),
+    }),
+    stream: ({ params }) => {
+      if (!params.loadCatalog || !params.estadoId) {
         return of([] as readonly Municipio[]);
       }
 
-      return this.repository.getMunicipios(estadoId);
+      return this.repository.getMunicipios(params.estadoId);
     },
     defaultValue: [] as readonly Municipio[],
   });
 
   readonly parroquiasResource = rxResource({
-    params: () => this.selectedMunicipioId(),
-    stream: ({ params: municipioId }) => {
-      if (!municipioId) {
+    params: () => ({
+      loadCatalog: this.filtersCatalogLoaded(),
+      municipioId: this.selectedMunicipioId(),
+    }),
+    stream: ({ params }) => {
+      if (!params.loadCatalog || !params.municipioId) {
         return of([] as readonly Parroquia[]);
       }
 
-      return this.repository.getParroquias(municipioId);
+      return this.repository.getParroquias(params.municipioId);
     },
     defaultValue: [] as readonly Parroquia[],
   });
@@ -104,6 +129,11 @@ export class PatientSearchStore {
   readonly estados = computed(() => this.estadosResource.value());
   readonly municipios = computed(() => this.municipiosResource.value());
   readonly parroquias = computed(() => this.parroquiasResource.value());
+  readonly filtersCatalogLoading = computed(
+    () =>
+      this.filtersCatalogLoaded() &&
+      (this.hospitalsResource.isLoading() || this.estadosResource.isLoading()),
+  );
   readonly showHospitalFilter = computed(() => this.hospitals().length > 0);
 
   readonly catalogError = computed(() => {
@@ -185,6 +215,8 @@ export class PatientSearchStore {
     () => this.hasSearched() && !this.loading() && !this.searchPending(),
   );
 
+  readonly showMobileSearchFab = signal(false);
+
   readonly mobileResultsJumpLabel = computed(() => {
     if (this.error()) {
       return 'Ir a resultados';
@@ -206,8 +238,10 @@ export class PatientSearchStore {
     this.destroyRef.onDestroy(() => {
       this.clearDebouncedSearch();
       this.clearSlowSearchTimer();
+      this.teardownMobileSearchFab();
     });
     this.loadDatasetMetadata();
+    afterNextRender(() => this.setupMobileSearchFab());
   }
 
   updateQuery(query: string): void {
@@ -268,7 +302,13 @@ export class PatientSearchStore {
   }
 
   toggleOptionalFilters(): void {
-    this.optionalFiltersExpanded.update((expanded) => !expanded);
+    this.optionalFiltersExpanded.update((expanded) => {
+      const nextExpanded = !expanded;
+      if (nextExpanded) {
+        this.filtersCatalogLoaded.set(true);
+      }
+      return nextExpanded;
+    });
   }
 
   clearFilter(key: ActiveFilterKey): void {
@@ -318,6 +358,20 @@ export class PatientSearchStore {
 
   goToResults(): void {
     this.scrollToResults();
+  }
+
+  goToSearch(): void {
+    const prefersReducedMotion =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    requestAnimationFrame(() => {
+      document.getElementById('patient-search-panel')?.scrollIntoView?.({
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+        block: 'start',
+      });
+      requestAnimationFrame(() => this.focusSearchInput());
+    });
   }
 
   private setupSearchPipeline(): void {
@@ -382,6 +436,72 @@ export class PatientSearchStore {
     });
   }
 
+  private setupMobileSearchFab(): void {
+    if (typeof window === 'undefined' || this.mobileSearchFabInitialized) {
+      return;
+    }
+
+    this.mobileSearchFabInitialized = true;
+    this.searchFabMediaQuery = window.matchMedia('(max-width: 1023px)');
+
+    this.searchFabScrollHandler = () => this.updateMobileSearchFab();
+    document.addEventListener('scroll', this.searchFabScrollHandler, { passive: true, capture: true });
+    window.addEventListener('resize', this.searchFabScrollHandler, { passive: true });
+
+    this.searchFabMediaHandler = () => this.updateMobileSearchFab();
+    this.searchFabMediaQuery.addEventListener('change', this.searchFabMediaHandler);
+
+    effect(() => {
+      this.hasSearched();
+      this.loading();
+      this.searchPending();
+
+      untracked(() => {
+        requestAnimationFrame(() => this.updateMobileSearchFab());
+      });
+    });
+  }
+
+  private updateMobileSearchFab(): void {
+    if (!this.searchFabMediaQuery?.matches || !this.hasSearched()) {
+      this.showMobileSearchFab.set(false);
+      return;
+    }
+
+    const searchAnchor =
+      document.getElementById('patient-search-query') ??
+      document.getElementById('patient-search-panel');
+    const resultsHeading = document.getElementById('results-heading');
+
+    if (!searchAnchor || !resultsHeading) {
+      this.showMobileSearchFab.set(false);
+      return;
+    }
+
+    const searchBottom = searchAnchor.getBoundingClientRect().bottom;
+    const resultsTop = resultsHeading.getBoundingClientRect().top;
+    const showFab = searchBottom < 72 && resultsTop < window.innerHeight;
+
+    this.showMobileSearchFab.set(showFab);
+  }
+
+  private teardownMobileSearchFab(): void {
+    if (this.searchFabScrollHandler) {
+      document.removeEventListener('scroll', this.searchFabScrollHandler, { capture: true });
+      window.removeEventListener('resize', this.searchFabScrollHandler);
+      this.searchFabScrollHandler = null;
+    }
+
+    if (this.searchFabMediaQuery && this.searchFabMediaHandler) {
+      this.searchFabMediaQuery.removeEventListener('change', this.searchFabMediaHandler);
+    }
+
+    this.searchFabMediaQuery = null;
+    this.searchFabMediaHandler = null;
+    this.mobileSearchFabInitialized = false;
+    this.showMobileSearchFab.set(false);
+  }
+
   private scrollToResults(): void {
     const prefersReducedMotion =
       typeof window.matchMedia === 'function' &&
@@ -392,6 +512,7 @@ export class PatientSearchStore {
         behavior: prefersReducedMotion ? 'auto' : 'smooth',
         block: 'start',
       });
+      requestAnimationFrame(() => this.updateMobileSearchFab());
     });
   }
 

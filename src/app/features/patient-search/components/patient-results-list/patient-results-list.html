@@ -1,4 +1,4 @@
-<section class="space-y-3">
+<section class="space-y-4">
   @for (patient of patients(); track patient.id) {
     <app-patient-result-card [patient]="patient" [query]="query()" />
   }

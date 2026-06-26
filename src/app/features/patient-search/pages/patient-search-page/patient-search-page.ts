@@ -23,4 +23,5 @@ import { PatientSearchStore } from '../../state/patient-search.store';
 })
 export class PatientSearchPage {
   readonly store = inject(PatientSearchStore);
+  readonly showMobileSearchFab = this.store.showMobileSearchFab;
 }

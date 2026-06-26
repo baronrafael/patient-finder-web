@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, delay, of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { APP_CONFIG } from '../../../../core/config/app-config.token';
@@ -45,13 +45,17 @@ function createSearchResult(page: number, ids: readonly string[]): PatientSearch
 
 class TestPatientRepository extends PatientRepository {
   searchCalls = 0;
+  hospitalsCalls = 0;
+  estadosCalls = 0;
   lastQuery: PatientSearchQuery | null = null;
 
   override getHospitals(): Observable<readonly Hospital[]> {
+    this.hospitalsCalls += 1;
     return of([]);
   }
 
   override getEstados(): Observable<readonly Estado[]> {
+    this.estadosCalls += 1;
     return of([]);
   }
 
@@ -108,6 +112,48 @@ describe('PatientSearchPage', () => {
     fixture.detectChanges();
     return fixture.componentInstance;
   }
+
+  it('does not load filter catalogs until optional filters are opened', () => {
+    const fixture = TestBed.createComponent(PatientSearchPage);
+    fixture.detectChanges();
+    const page = fixture.componentInstance;
+
+    expect(repository.hospitalsCalls).toBe(0);
+    expect(repository.estadosCalls).toBe(0);
+
+    page.store.toggleOptionalFilters();
+    fixture.detectChanges();
+
+    expect(repository.hospitalsCalls).toBe(1);
+    expect(repository.estadosCalls).toBe(1);
+  });
+
+  it('shows filter catalog loading state while states and centers load', async () => {
+    repository.getHospitals = () => {
+      repository.hospitalsCalls += 1;
+      return of([]).pipe(delay(50));
+    };
+    repository.getEstados = () => {
+      repository.estadosCalls += 1;
+      return of([]).pipe(delay(50));
+    };
+
+    const fixture = TestBed.createComponent(PatientSearchPage);
+    fixture.detectChanges();
+    const page = fixture.componentInstance;
+
+    page.store.toggleOptionalFilters();
+    fixture.detectChanges();
+
+    expect(page.store.filtersCatalogLoading()).toBe(true);
+
+    await new Promise((resolve) => setTimeout(resolve, 60));
+    fixture.detectChanges();
+
+    expect(page.store.filtersCatalogLoading()).toBe(false);
+    expect(repository.hospitalsCalls).toBe(1);
+    expect(repository.estadosCalls).toBe(1);
+  });
 
   it('keeps location filters when typing a partial query', () => {
     const page = createPage();

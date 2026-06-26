@@ -15,6 +15,7 @@ import { PATIENT_SEARCH_MESSAGES } from '../../utils/patient-search.messages';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OptionalFiltersPanel {
+  readonly catalogLoading = input(false);
   readonly expanded = input(false);
   readonly activeFilterCount = input(0);
   readonly collapsedSummary = input<string | null>(null);
