@@ -8,6 +8,7 @@ import { Estado, Municipio, Parroquia } from '../models/location.model';
 import { PatientRecord } from '../models/patient-record.model';
 import { PatientSearchQuery } from '../models/patient-search-query.model';
 import { PatientSearchResult } from '../models/patient-search-result.model';
+import { formatSearchQueryForApi } from '../utils/patient-search.matcher';
 import { PatientRepository } from './patient.repository';
 
 interface ApiStateDto {
@@ -139,7 +140,7 @@ export class ApiPatientRepository extends PatientRepository {
 
     const trimmedQuery = query.query.trim();
     if (trimmedQuery) {
-      params = params.set('q', trimmedQuery);
+      params = params.set('q', formatSearchQueryForApi(trimmedQuery));
     }
     if (query.sex) {
       params = params.set('sex', query.sex);
