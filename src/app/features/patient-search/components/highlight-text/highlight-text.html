@@ -1,0 +1,7 @@
+@for (segment of segments(); track $index) {
+  @if (segment.highlight) {
+    <mark class="search-highlight">{{ segment.text }}</mark>
+  } @else {
+    {{ segment.text }}
+  }
+}

@@ -1,0 +1,102 @@
+<article class="card border border-slate-200 bg-white shadow-sm">
+  <div class="card-body gap-3 p-4 sm:p-5">
+    <div class="flex items-start justify-between gap-3">
+      <div class="min-w-0">
+        <div class="flex flex-wrap items-center gap-2">
+          <h3 class="text-lg font-bold leading-tight text-slate-950">
+            <app-highlight-text [text]="patient().fullName" [query]="query()" />
+          </h3>
+          @if (isExactDocumentMatch()) {
+            <span class="badge badge-sm border-slate-300 bg-slate-100 text-slate-700">Coincidencia exacta</span>
+          }
+        </div>
+        <p class="mt-1 text-sm font-semibold text-teal-700">{{ patient().hospitalName }}</p>
+      </div>
+      <div class="flex shrink-0 gap-1">
+        @if (canShare()) {
+          <button
+            class="btn btn-ghost btn-sm text-slate-700"
+            type="button"
+            (click)="shareContactDetails()"
+            aria-label="Compartir datos"
+          >
+            Compartir
+          </button>
+        }
+        <button
+          class="btn btn-ghost btn-sm text-slate-700"
+          type="button"
+          (click)="copyContactDetails()"
+          aria-label="Copiar datos de contacto"
+        >
+          Copiar
+        </button>
+      </div>
+    </div>
+
+    @if (copyFeedback(); as feedback) {
+      <p class="text-xs font-medium text-slate-600" aria-live="polite">{{ feedback }}</p>
+    }
+
+    <dl class="grid gap-2 text-sm text-slate-700 sm:grid-cols-2">
+      @if (patient().age) {
+        <div>
+          <dt class="font-semibold text-slate-900">Edad</dt>
+          <dd>{{ patient().age }}</dd>
+        </div>
+      }
+      @if (patient().identityDocument; as identityDocument) {
+        <div>
+          <dt class="font-semibold text-slate-900">Cédula / ID</dt>
+          <dd class="flex flex-wrap items-center gap-2">
+            <span>
+              <app-highlight-text [text]="identityDocument" [query]="query()" />
+            </span>
+            <button
+              class="btn btn-ghost btn-xs text-slate-700"
+              type="button"
+              (click)="copyIdentityDocument()"
+              aria-label="Copiar cédula"
+            >
+              Copiar cédula
+            </button>
+          </dd>
+        </div>
+      }
+      @if (patient().address) {
+        <div>
+          <dt class="font-semibold text-slate-900">Dirección / procedencia</dt>
+          <dd>{{ patient().address }}</dd>
+        </div>
+      }
+      @if (patient().phone; as phone) {
+        <div>
+          <dt class="font-semibold text-slate-900">Teléfono / contacto</dt>
+          <dd class="flex flex-wrap items-center gap-x-3 gap-y-1">
+            @if (phoneHref(); as href) {
+              <a class="link link-neutral" [href]="href">{{ phone }}</a>
+            } @else {
+              <span>{{ phone }}</span>
+            }
+            @if (whatsAppHref(); as whatsApp) {
+              <a
+                class="link link-neutral text-xs font-medium"
+                [href]="whatsApp"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                WhatsApp
+              </a>
+            }
+          </dd>
+        </div>
+      }
+      @if (patient().observations) {
+        <div class="sm:col-span-2">
+          <dt class="font-semibold text-slate-900">Observaciones</dt>
+          <dd>{{ patient().observations }}</dd>
+        </div>
+      }
+    </dl>
+  </div>
+</article>

@@ -1,0 +1,54 @@
+<form class="search-form space-y-2" (submit)="$event.preventDefault(); onSubmit()">
+  <label class="text-sm font-semibold text-slate-800" for="patient-search-query"
+    >Nombre, apellido o cédula</label
+  >
+  <div class="search-bar flex flex-col gap-2">
+    <input
+      id="patient-search-query"
+      class="search-input input input-bordered min-h-12 w-full bg-white text-base"
+      type="search"
+      autocomplete="off"
+      inputmode="search"
+      placeholder="Ej. García, María Pérez o 28443736"
+      [formField]="searchForm.query"
+    />
+    <div class="flex gap-2">
+      <button
+        class="btn btn-primary min-h-12 flex-1 px-4 sm:flex-none"
+        type="submit"
+        [disabled]="disabled() || pending() || !canSubmit()"
+      >
+        Buscar
+      </button>
+      @if (searchModel().query) {
+        <button
+          class="btn btn-outline min-h-12 border-slate-300 px-4"
+          type="button"
+          [disabled]="disabled()"
+          (click)="onClear()"
+          aria-label="Limpiar búsqueda"
+        >
+          Limpiar
+        </button>
+      }
+    </div>
+  </div>
+  @if (slowSearch()) {
+    <p class="text-xs text-amber-700" aria-live="polite">
+      La conexión parece lenta. Seguimos buscando...
+    </p>
+  } @else if (pending() || disabled()) {
+    <p class="flex items-center gap-2 text-xs text-slate-600" aria-live="polite">
+      <span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
+      @if (pending()) {
+        Preparando búsqueda...
+      } @else {
+        Buscando...
+      }
+    </p>
+  } @else {
+    <p class="text-xs leading-5 text-slate-500">
+      Escribe al menos dos letras del nombre o cuatro dígitos de la cédula.
+    </p>
+  }
+</form>

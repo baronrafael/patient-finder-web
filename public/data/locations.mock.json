@@ -1,0 +1,107 @@
+{
+  "data": [
+    {
+      "id": "distrito-capital",
+      "name": "Distrito Capital",
+      "municipios": [
+        {
+          "id": "libertador",
+          "name": "Libertador",
+          "parroquias": [
+            { "id": "23-de-enero", "name": "23 de Enero" },
+            { "id": "altagracia", "name": "Altagracia" },
+            { "id": "candelaria", "name": "Candelaria" },
+            { "id": "catedral", "name": "Catedral" },
+            { "id": "el-junquito", "name": "El Junquito" },
+            { "id": "el-paraiso", "name": "El Paraíso" },
+            { "id": "el-recurso", "name": "El Recurso" },
+            { "id": "el-valle", "name": "El Valle" },
+            { "id": "la-pastora", "name": "La Pastora" },
+            { "id": "la-vega", "name": "La Vega" },
+            { "id": "macarao", "name": "Macarao" },
+            { "id": "san-agustin", "name": "San Agustín" },
+            { "id": "san-bernardino", "name": "San Bernardino" },
+            { "id": "san-jose", "name": "San José" },
+            { "id": "san-juan", "name": "San Juan" },
+            { "id": "san-pedro", "name": "San Pedro" },
+            { "id": "santa-rosalia", "name": "Santa Rosalía" },
+            { "id": "santa-teresa", "name": "Santa Teresa" },
+            { "id": "sucre", "name": "Sucre" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "miranda",
+      "name": "Miranda",
+      "municipios": [
+        {
+          "id": "baruta",
+          "name": "Baruta",
+          "parroquias": [
+            { "id": "baruta", "name": "Baruta" },
+            { "id": "el-cafetal", "name": "El Cafetal" },
+            { "id": "las-minas-de-baruta", "name": "Las Minas de Baruta" }
+          ]
+        },
+        {
+          "id": "chacao",
+          "name": "Chacao",
+          "parroquias": [{ "id": "chacao", "name": "Chacao" }]
+        },
+        {
+          "id": "el-hatillo",
+          "name": "El Hatillo",
+          "parroquias": [{ "id": "el-hatillo", "name": "El Hatillo" }]
+        },
+        {
+          "id": "sucre",
+          "name": "Sucre",
+          "parroquias": [
+            { "id": "lecheria", "name": "Lechería" },
+            { "id": "petare", "name": "Petare" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "carabobo",
+      "name": "Carabobo",
+      "municipios": [
+        {
+          "id": "valencia",
+          "name": "Valencia",
+          "parroquias": [
+            { "id": "candelaria", "name": "Candelaria" },
+            { "id": "catedral", "name": "Catedral" },
+            { "id": "el-patacon", "name": "El Patacón" },
+            { "id": "miguel-pena", "name": "Miguel Peña" },
+            { "id": "rafael-urdaneta", "name": "Rafael Urdaneta" },
+            { "id": "san-blas", "name": "San Blas" },
+            { "id": "san-jose", "name": "San José" },
+            { "id": "santa-rosa", "name": "Santa Rosa" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lara",
+      "name": "Lara",
+      "municipios": [
+        {
+          "id": "iribarren",
+          "name": "Iribarren",
+          "parroquias": [
+            { "id": "catedral", "name": "Catedral" },
+            { "id": "concepcion", "name": "Concepción" },
+            { "id": "el-cuji", "name": "El Cují" },
+            { "id": "juan-de-villegas", "name": "Juan de Villegas" },
+            { "id": "santa-rosa", "name": "Santa Rosa" },
+            { "id": "tamaca", "name": "Tamaca" },
+            { "id": "union", "name": "Unión" }
+          ]
+        }
+      ]
+    }
+  ]
+}

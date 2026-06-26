@@ -1,0 +1,21 @@
+<section class="space-y-3">
+  @for (patient of patients(); track patient.id) {
+    <app-patient-result-card [patient]="patient" [query]="query()" />
+  }
+
+  @if (hasMore()) {
+    <button
+      class="btn btn-primary min-h-12 w-full"
+      type="button"
+      [disabled]="loadingMore()"
+      (click)="loadMore.emit()"
+    >
+      @if (loadingMore()) {
+        <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
+        Cargando más...
+      } @else {
+        Ver más
+      }
+    </button>
+  }
+</section>

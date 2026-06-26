@@ -1,0 +1,22 @@
+@if (chips().length > 0) {
+  <div
+    class="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3"
+    aria-label="Filtros activos"
+  >
+    <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Filtros activos</span>
+    @for (chip of chips(); track chip.key + chip.label) {
+      <button
+        class="badge badge-outline gap-1 border-slate-300 bg-white pr-1 text-slate-800 hover:bg-slate-100"
+        type="button"
+        (click)="chipRemove.emit(chip.key)"
+        [attr.aria-label]="'Quitar filtro ' + chip.label"
+      >
+        {{ chip.label }}
+        <span aria-hidden="true" class="text-base leading-none">×</span>
+      </button>
+    }
+    <button class="btn btn-ghost btn-xs ml-auto text-teal-700" type="button" (click)="clearAll.emit()">
+      Quitar todos
+    </button>
+  </div>
+}

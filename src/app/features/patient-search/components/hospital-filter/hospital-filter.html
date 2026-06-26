@@ -1,0 +1,15 @@
+<div class="min-w-0">
+  <label class="text-sm font-semibold text-slate-800" for="hospital-filter">Hospital o centro</label>
+  <select
+    id="hospital-filter"
+    class="filter-select select select-bordered mt-2 min-h-11 w-full min-w-0 bg-white text-sm"
+    [formField]="hospitalForm.hospitalId"
+  >
+    <option value="">Todos los hospitales</option>
+    @for (hospital of hospitals(); track hospital.id) {
+      <option [value]="hospital.id" [title]="hospital.name + ' (' + hospital.recordCount + ')'">
+        {{ hospital.name }} ({{ hospital.recordCount }})
+      </option>
+    }
+  </select>
+</div>

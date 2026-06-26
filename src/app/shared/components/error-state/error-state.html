@@ -1,0 +1,15 @@
+<section class="alert alert-error items-start" aria-live="polite" role="alert">
+  <svg aria-hidden="true" class="mt-1 size-5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+    <path
+      fill-rule="evenodd"
+      d="M18 10A8 8 0 1 1 2 10a8 8 0 0 1 16 0ZM9 5a1 1 0 0 1 2 0v5a1 1 0 1 1-2 0V5Zm1 10a1.25 1.25 0 1 0 0-2.5A1.25 1.25 0 0 0 10 15Z"
+      clip-rule="evenodd"
+    />
+  </svg>
+  <div class="flex-1">
+    <p class="font-semibold">{{ message() }}</p>
+    <button class="btn btn-sm mt-3 min-h-11" type="button" (click)="retry.emit()">
+      Intentar nuevamente
+    </button>
+  </div>
+</section>
