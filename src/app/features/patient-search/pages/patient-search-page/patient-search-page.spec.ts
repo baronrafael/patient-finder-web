@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { provideRouter, Router } from '@angular/router';
 import { Observable, delay, of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -11,6 +12,7 @@ import { Estado, Municipio, Parroquia } from '../../models/location.model';
 import { PatientRecord } from '../../models/patient-record.model';
 import { PatientSearchQuery } from '../../models/patient-search-query.model';
 import { PatientSearchResult } from '../../models/patient-search-result.model';
+import { patientSearchRoutes } from '../../patient-search.routes';
 import { PATIENT_SEARCH_DEBOUNCE_MS, PATIENT_SEARCH_PAGE_SIZE } from '../../utils/patient-search.constants';
 import { PatientSearchPage } from './patient-search-page';
 
@@ -81,13 +83,25 @@ class TestPatientRepository extends PatientRepository {
 
 describe('PatientSearchPage', () => {
   let repository: TestPatientRepository;
+  let router: Router;
 
   beforeEach(async () => {
     repository = new TestPatientRepository();
 
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    );
+
     await TestBed.configureTestingModule({
       imports: [PatientSearchPage],
       providers: [
+        provideRouter(patientSearchRoutes),
         provideHttpClient(),
         { provide: PATIENT_REPOSITORY, useValue: repository },
         {
@@ -101,6 +115,8 @@ describe('PatientSearchPage', () => {
         },
       ],
     }).compileComponents();
+
+    router = TestBed.inject(Router);
   });
 
   afterEach(() => {
@@ -188,8 +204,9 @@ describe('PatientSearchPage', () => {
     expect(store.query()).toBe('');
   });
 
-  it('debounces text search until the debounce window passes', () => {
+  it('debounces text search until the debounce window passes', async () => {
     vi.useFakeTimers();
+    await router.navigateByUrl('/');
     const page = createPage();
     const store = page.store;
     const initialCalls = repository.searchCalls;
@@ -199,9 +216,46 @@ describe('PatientSearchPage', () => {
     expect(repository.searchCalls).toBe(initialCalls);
 
     vi.advanceTimersByTime(PATIENT_SEARCH_DEBOUNCE_MS);
+    await vi.runOnlyPendingTimersAsync();
 
     expect(repository.searchCalls).toBe(initialCalls + 1);
     expect(repository.lastQuery?.query).toBe('Garcia');
+    expect(router.url).toContain('q=Garcia');
+  });
+
+  it('hydrates search state from url query params and runs the search', async () => {
+    await router.navigateByUrl('/?q=Garcia&sex=f&estado_id=miranda');
+
+    const fixture = TestBed.createComponent(PatientSearchPage);
+    fixture.detectChanges();
+    const store = fixture.componentInstance.store;
+
+    await vi.waitFor(() => expect(store.result()?.items).toHaveLength(2));
+
+    expect(store.query()).toBe('Garcia');
+    expect(store.selectedSex()).toBe('f');
+    expect(store.selectedEstadoId()).toBe('miranda');
+    expect(store.filtersCatalogLoaded()).toBe(true);
+    expect(store.hasSearched()).toBe(true);
+    expect(store.loading()).toBe(false);
+  });
+
+  it('clears url query params when search is cleared', async () => {
+    vi.useFakeTimers();
+    await router.navigateByUrl('/');
+    const page = createPage();
+    const store = page.store;
+
+    store.updateQuery('Garcia');
+    vi.advanceTimersByTime(PATIENT_SEARCH_DEBOUNCE_MS);
+    await vi.runOnlyPendingTimersAsync();
+
+    expect(router.url).toContain('q=Garcia');
+
+    store.clearSearch();
+    await vi.runOnlyPendingTimersAsync();
+
+    expect(router.url).not.toContain('q=');
   });
 
   it('runs submit immediately and cancels a pending debounced search', () => {

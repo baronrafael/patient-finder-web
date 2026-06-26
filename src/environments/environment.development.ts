@@ -2,6 +2,7 @@ import { API_BASE_URL } from './api.constants';
 
 export const environment = {
   production: false,
+  cloudflareWebAnalyticsToken: '',
   appConfig: {
     useMockData: false,
     mockDataUrl: '/data/patients.mock.json',

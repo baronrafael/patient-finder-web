@@ -1,5 +1,6 @@
 import { DestroyRef, Injectable, afterNextRender, computed, effect, inject, linkedSignal, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed, rxResource } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 import { EMPTY, Subject, catchError, finalize, of, switchMap, tap } from 'rxjs';
 
 import { mapHttpError } from '../../../core/http/http-error.mapper';
@@ -25,12 +26,20 @@ import {
   PATIENT_SEARCH_PAGE_SIZE,
   SLOW_SEARCH_THRESHOLD_MS,
 } from '../utils/patient-search.constants';
+import {
+  hasPatientSearchUrlState,
+  parsePatientSearchUrlParams,
+  patientSearchUrlParamsMatch,
+  serializePatientSearchUrlParams,
+} from '../utils/patient-search-url';
 
 @Injectable()
 export class PatientSearchStore {
   private readonly repository = inject(PATIENT_REPOSITORY);
   private readonly config = inject(APP_CONFIG);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly searchRequest$ = new Subject<void>();
   private queryDebounceTimer: ReturnType<typeof setTimeout> | null = null;
   private slowSearchTimer: ReturnType<typeof setTimeout> | null = null;
@@ -234,6 +243,7 @@ export class PatientSearchStore {
 
   constructor() {
     this.setupSearchPipeline();
+    this.hydrateFromUrl();
     this.setupResultsScroll();
     this.destroyRef.onDestroy(() => {
       this.clearDebouncedSearch();
@@ -254,6 +264,7 @@ export class PatientSearchStore {
       this.result.set(null);
       this.error.set(null);
       this.resetSelectionFilters();
+      this.syncUrlToState();
       return;
     }
 
@@ -262,6 +273,7 @@ export class PatientSearchStore {
       this.hasSearched.set(false);
       this.result.set(null);
       this.error.set(null);
+      this.syncUrlToState();
       return;
     }
 
@@ -271,6 +283,7 @@ export class PatientSearchStore {
   updateHospital(hospitalId: string | null): void {
     this.selectedHospitalId.set(hospitalId);
     this.page.set(1);
+    this.syncUrlToState();
     this.runSearchIfActive();
   }
 
@@ -281,6 +294,7 @@ export class PatientSearchStore {
     this.selectedParroquiaId.set(filters.parroquiaId);
     this.resetHospitalIfOutsideLocation();
     this.page.set(1);
+    this.syncUrlToState();
     this.runSearchIfActive();
   }
 
@@ -299,6 +313,7 @@ export class PatientSearchStore {
     this.hasSearched.set(false);
     this.result.set(null);
     this.error.set(null);
+    this.syncUrlToState();
   }
 
   toggleOptionalFilters(): void {
@@ -334,12 +349,14 @@ export class PatientSearchStore {
     }
 
     this.page.set(1);
+    this.syncUrlToState();
     this.runSearchIfActive();
   }
 
   clearAllFilters(): void {
     this.resetSelectionFilters();
     this.page.set(1);
+    this.syncUrlToState();
     this.runSearchIfActive();
   }
 
@@ -565,6 +582,7 @@ export class PatientSearchStore {
       return;
     }
 
+    this.syncUrlToState();
     this.hasSearched.set(true);
     this.searchRequest$.next();
   }
@@ -633,6 +651,52 @@ export class PatientSearchStore {
     this.result.set({
       ...searchResult,
       items: [...previous.items, ...nextItems],
+    });
+  }
+
+  private hydrateFromUrl(): void {
+    const snapshot = this.route.snapshot.queryParamMap;
+    if (!hasPatientSearchUrlState(snapshot)) {
+      return;
+    }
+
+    const parsed = parsePatientSearchUrlParams(snapshot);
+    const hasFilters =
+      parsed.hospitalId !== null ||
+      parsed.sex !== null ||
+      parsed.estadoId !== null ||
+      parsed.municipioId !== null ||
+      parsed.parroquiaId !== null;
+
+    if (hasFilters) {
+      this.filtersCatalogLoaded.set(true);
+    }
+
+    this.selectedHospitalId.set(parsed.hospitalId);
+    this.selectedSex.set(parsed.sex);
+    this.selectedEstadoId.set(parsed.estadoId);
+    this.selectedMunicipioId.set(parsed.municipioId);
+    this.selectedParroquiaId.set(parsed.parroquiaId);
+    this.page.set(parsed.page);
+    this.query.set(parsed.query);
+
+    if (isSearchActive(parsed.query)) {
+      this.runSearch();
+    }
+  }
+
+  private syncUrlToState(): void {
+    const nextParams = serializePatientSearchUrlParams(this.buildSearchQuery());
+    const currentParams = this.route.snapshot.queryParamMap;
+
+    if (patientSearchUrlParamsMatch(currentParams, nextParams)) {
+      return;
+    }
+
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: nextParams,
+      replaceUrl: true,
     });
   }
 }
