@@ -37,34 +37,38 @@
     </div>
   </header>
 
-  @if (hasFacts()) {
-    <dl class="patient-card__facts">
-      @if (patient().identityDocument; as identityDocument) {
-        <div class="patient-card__fact patient-card__fact--primary">
-          <dt>Cédula / ID</dt>
-          <dd>
-            <span class="patient-card__fact-value">
-              <app-highlight-text [text]="identityDocument" [query]="query()" />
-            </span>
-            <button
-              class="patient-card__inline-action"
-              type="button"
-              (click)="copyIdentityDocument()"
-              aria-label="Copiar cédula de {{ patient().fullName }}"
-            >
-              Copiar
-            </button>
-          </dd>
-        </div>
-      }
-      @if (patient().age; as age) {
-        <div class="patient-card__fact">
-          <dt>Edad</dt>
-          <dd>{{ age }}</dd>
-        </div>
-      }
-    </dl>
-  }
+  <dl class="patient-card__facts">
+    <div class="patient-card__fact patient-card__fact--primary">
+      <dt>Cédula / ID</dt>
+      <dd>
+        @if (hasIdentityDocument()) {
+          <span class="patient-card__fact-value">
+            <app-highlight-text [text]="patient().identityDocument!" [query]="query()" />
+          </span>
+          <button
+            class="patient-card__inline-action"
+            type="button"
+            (click)="copyIdentityDocument()"
+            aria-label="Copiar cédula de {{ patient().fullName }}"
+          >
+            Copiar
+          </button>
+        } @else {
+          <span class="patient-card__fact-empty">{{ emptyLabels.identityDocument }}</span>
+        }
+      </dd>
+    </div>
+    <div class="patient-card__fact">
+      <dt>Edad</dt>
+      <dd>
+        @if (hasAge()) {
+          <span class="patient-card__fact-value">{{ patient().age }}</span>
+        } @else {
+          <span class="patient-card__fact-empty">{{ emptyLabels.age }}</span>
+        }
+      </dd>
+    </div>
+  </dl>
 
   @if (!hasContact()) {
     <p class="patient-card__no-contact">Sin teléfono registrado en esta lista.</p>
@@ -129,46 +133,55 @@
     }
   </footer>
 
-  @if (hasSecondaryDetails()) {
-    <div class="patient-card__secondary">
-      <button
-        class="patient-card__details-toggle"
-        type="button"
-        (click)="toggleDetails()"
-        [attr.aria-expanded]="detailsExpanded()"
+  <div class="patient-card__secondary">
+    <button
+      class="patient-card__details-toggle"
+      type="button"
+      (click)="toggleDetails()"
+      [attr.aria-expanded]="detailsExpanded()"
+    >
+      {{ detailsExpanded() ? 'Ocultar datos adicionales' : 'Ver datos adicionales' }}
+      <svg
+        aria-hidden="true"
+        class="patient-card__details-chevron"
+        [class.patient-card__details-chevron--open]="detailsExpanded()"
+        viewBox="0 0 20 20"
+        fill="currentColor"
       >
-        {{ detailsExpanded() ? 'Ocultar datos adicionales' : 'Ver datos adicionales' }}
-        <svg
-          aria-hidden="true"
-          class="patient-card__details-chevron"
-          [class.patient-card__details-chevron--open]="detailsExpanded()"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z"
-            clip-rule="evenodd"
-          />
-        </svg>
-      </button>
+        <path
+          fill-rule="evenodd"
+          d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </button>
 
-      @if (detailsExpanded()) {
-        <dl class="patient-card__secondary-details">
-          @if (patient().address; as address) {
-            <div class="patient-card__secondary-item">
-              <dt>Dirección / procedencia</dt>
-              <dd>{{ address }}</dd>
-            </div>
-          }
-          @if (patient().observations; as observations) {
-            <div class="patient-card__secondary-item patient-card__secondary-item--alert">
-              <dt>Observaciones</dt>
-              <dd>{{ observations }}</dd>
-            </div>
-          }
-        </dl>
-      }
-    </div>
-  }
+    @if (detailsExpanded()) {
+      <dl class="patient-card__secondary-details">
+        <div class="patient-card__secondary-item">
+          <dt>Dirección / procedencia</dt>
+          <dd>
+            @if (hasAddress()) {
+              {{ patient().address }}
+            } @else {
+              <span class="patient-card__fact-empty">{{ emptyLabels.address }}</span>
+            }
+          </dd>
+        </div>
+        <div
+          class="patient-card__secondary-item"
+          [class.patient-card__secondary-item--alert]="hasObservations()"
+        >
+          <dt>Observaciones</dt>
+          <dd>
+            @if (hasObservations()) {
+              {{ patient().observations }}
+            } @else {
+              <span class="patient-card__fact-empty">{{ emptyLabels.observations }}</span>
+            }
+          </dd>
+        </div>
+      </dl>
+    }
+  </div>
 </article>

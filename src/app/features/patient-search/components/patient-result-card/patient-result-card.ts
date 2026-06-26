@@ -7,6 +7,7 @@ import {
   buildPatientShareSummary,
 } from '../../utils/build-patient-contact-summary';
 import { getHospitalAvatarColors, getPatientInitials } from '../../utils/patient-card.presenter';
+import { PATIENT_FIELD_EMPTY_LABELS, hasPatientFieldValue } from '../../utils/patient-field-display';
 import { isExactDocumentMatch } from '../../utils/patient-search.matcher';
 import { HighlightText } from '../highlight-text/highlight-text';
 
@@ -47,15 +48,17 @@ export class PatientResultCard {
 
   readonly isExactDocumentMatch = computed(() => isExactDocumentMatch(this.patient(), this.query()));
 
-  readonly hasContact = computed(() => Boolean(this.patient().phone));
+  readonly hasContact = computed(() => hasPatientFieldValue(this.patient().phone));
 
-  readonly hasFacts = computed(
-    () => Boolean(this.patient().age || this.patient().identityDocument),
-  );
+  readonly hasIdentityDocument = computed(() => hasPatientFieldValue(this.patient().identityDocument));
 
-  readonly hasSecondaryDetails = computed(
-    () => Boolean(this.patient().address || this.patient().observations),
-  );
+  readonly hasAge = computed(() => hasPatientFieldValue(this.patient().age));
+
+  readonly hasAddress = computed(() => hasPatientFieldValue(this.patient().address));
+
+  readonly hasObservations = computed(() => hasPatientFieldValue(this.patient().observations));
+
+  readonly emptyLabels = PATIENT_FIELD_EMPTY_LABELS;
 
   readonly canShare = computed(
     () => typeof navigator !== 'undefined' && typeof navigator.share === 'function',

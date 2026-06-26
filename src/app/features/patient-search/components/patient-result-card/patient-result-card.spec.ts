@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
 import { PatientRecord } from '../../models/patient-record.model';
+import { PATIENT_FIELD_EMPTY_LABELS } from '../../utils/patient-field-display';
 import { PatientResultCard } from './patient-result-card';
 
 function createPatient(overrides: Partial<PatientRecord> = {}): PatientRecord {
@@ -21,7 +22,7 @@ function createPatient(overrides: Partial<PatientRecord> = {}): PatientRecord {
 }
 
 describe('PatientResultCard', () => {
-  it('omits optional fields without content', async () => {
+  it('shows primary fields with empty placeholders when values are missing', async () => {
     const fixture = TestBed.createComponent(PatientResultCard);
 
     fixture.componentRef.setInput('patient', createPatient());
@@ -30,9 +31,12 @@ describe('PatientResultCard', () => {
 
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.textContent).toContain('GARCÍA MARÍA');
-    expect(compiled.textContent).not.toContain('Edad');
-    expect(compiled.textContent).not.toContain('Cédula / ID');
+    expect(compiled.textContent).toContain('Cédula / ID');
+    expect(compiled.textContent).toContain(PATIENT_FIELD_EMPTY_LABELS.identityDocument);
+    expect(compiled.textContent).toContain('Edad');
+    expect(compiled.textContent).toContain(PATIENT_FIELD_EMPTY_LABELS.age);
     expect(compiled.textContent).toContain('Sin teléfono registrado');
+    expect(compiled.textContent).toContain('Ver datos adicionales');
   });
 
   it('shows contact actions and phone when available', async () => {
@@ -57,7 +61,25 @@ describe('PatientResultCard', () => {
     expect(compiled.querySelector('.patient-card__avatar')?.textContent).toContain('GM');
   });
 
-  it('reveals secondary details when expanded', async () => {
+  it('reveals secondary details with placeholders when expanded', async () => {
+    const fixture = TestBed.createComponent(PatientResultCard);
+
+    fixture.componentRef.setInput('patient', createPatient());
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).not.toContain('Dirección / procedencia');
+
+    compiled.querySelector<HTMLButtonElement>('.patient-card__details-toggle')?.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(compiled.textContent).toContain(PATIENT_FIELD_EMPTY_LABELS.address);
+    expect(compiled.textContent).toContain(PATIENT_FIELD_EMPTY_LABELS.observations);
+  });
+
+  it('highlights observations when present in secondary details', async () => {
     const fixture = TestBed.createComponent(PatientResultCard);
 
     fixture.componentRef.setInput(
@@ -71,13 +93,12 @@ describe('PatientResultCard', () => {
     await fixture.whenStable();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.textContent).not.toContain('Requiere seguimiento');
-
     compiled.querySelector<HTMLButtonElement>('.patient-card__details-toggle')?.click();
     fixture.detectChanges();
     await fixture.whenStable();
 
     expect(compiled.textContent).toContain('Caracas');
     expect(compiled.textContent).toContain('Requiere seguimiento');
+    expect(compiled.querySelector('.patient-card__secondary-item--alert')).toBeTruthy();
   });
 });
