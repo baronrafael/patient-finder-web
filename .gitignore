@@ -45,3 +45,6 @@ Thumbs.db
 
 # Patient source data (not versioned; obtain from the operations team)
 /data-source/*.xlsx
+
+# Local planning docs (not versioned)
+/.plans/
