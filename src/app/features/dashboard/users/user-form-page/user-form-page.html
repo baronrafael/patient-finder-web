@@ -1,0 +1,32 @@
+<app-page-shell>
+  <app-page-header [title]="pageTitle()" [subtitle]="pageSubtitle()">
+    <a class="btn btn-soft" [routerLink]="paths.users">Volver a la lista</a>
+  </app-page-header>
+
+  @if (loading()) {
+    <app-loading-skeleton />
+  } @else if (loadError(); as message) {
+    <app-error-state [message]="message" (retry)="reloadUser()" />
+  } @else if (catalogError(); as message) {
+    <app-error-state [message]="message" (retry)="retryCatalog()" />
+  } @else if (isEditMode() && !initialValue()) {
+    <app-error-state
+      message="No encontramos este voluntario."
+      (retry)="reloadUser()"
+    />
+  } @else if (initialValue(); as value) {
+    @if (saveError(); as error) {
+      <div class="alert alert-error mt-4 text-sm" role="alert">{{ error }}</div>
+    }
+
+    <app-user-form
+      [initialValue]="value"
+      [roleOptions]="roleOptions()"
+      [centerOptions]="centerOptions()"
+      [isEditMode]="isEditMode()"
+      [submitLabel]="submitLabel()"
+      [disabled]="saving()"
+      (submitted)="onSubmitted($event)"
+    />
+  }
+</app-page-shell>

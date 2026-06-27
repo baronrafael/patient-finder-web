@@ -46,6 +46,18 @@ export const dashboardRoutes: Routes = [
         canActivate: [permissionGuard('users:read')],
       },
       {
+        path: 'usuarios/nuevo',
+        loadComponent: () =>
+          import('./users/user-form-page/user-form-page').then((m) => m.UserFormPage),
+        canActivate: [permissionGuard('users:create')],
+      },
+      {
+        path: 'usuarios/:id',
+        loadComponent: () =>
+          import('./users/user-form-page/user-form-page').then((m) => m.UserFormPage),
+        canActivate: [permissionGuard('users:update')],
+      },
+      {
         path: 'perfil',
         loadComponent: () => import('./profile/profile-page/profile-page').then((m) => m.ProfilePage),
       },

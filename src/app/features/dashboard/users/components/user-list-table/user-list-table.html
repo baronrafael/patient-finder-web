@@ -1,0 +1,49 @@
+<div class="overflow-x-auto">
+  <table class="table table-zebra">
+    <caption class="sr-only">Lista de voluntarios del dashboard</caption>
+    <thead>
+      <tr>
+        <th scope="col">Nombre</th>
+        <th scope="col">Email</th>
+        <th scope="col">Roles</th>
+        <th scope="col">Estado</th>
+        <th scope="col" class="text-right">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (user of items(); track user.id) {
+        <tr>
+          <td class="font-medium text-slate-900">{{ user.fullName }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.rolesLabel }}</td>
+          <td>
+            <span
+              class="badge badge-sm"
+              [class.badge-success]="user.isActive"
+              [class.badge-ghost]="!user.isActive"
+            >
+              {{ user.statusLabel }}
+            </span>
+          </td>
+          <td>
+            <div class="flex justify-end gap-2">
+              @if (user.canEdit) {
+                <a class="btn btn-soft btn-sm" [routerLink]="userDetailPath()(user.id)">Editar</a>
+              }
+              @if (user.canDelete) {
+                <button
+                  class="btn btn-soft btn-sm text-error"
+                  type="button"
+                  [disabled]="deletingId() === user.id"
+                  (click)="deleteRequested.emit(user)"
+                >
+                  {{ deletingId() === user.id ? 'Desactivando…' : 'Desactivar' }}
+                </button>
+              }
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

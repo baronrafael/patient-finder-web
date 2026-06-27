@@ -1,0 +1,171 @@
+<form class="user-form" (submit)="onSubmit($event)">
+  <section class="user-form__section">
+    <h2 class="user-form__section-title">Cuenta</h2>
+    <div class="user-form__grid">
+      <div class="user-form__field">
+        <app-text-field
+          label="Correo electrónico"
+          inputId="user-email"
+          type="email"
+          autocomplete="email"
+          [refinedBorder]="true"
+          [field]="form.email"
+        />
+        @if (showErrors()) {
+          @let error = fieldErrorMarkup('email');
+          <p
+            class="field-error user-form__field-error"
+            [class.invisible]="!error.visible"
+            [attr.aria-hidden]="!error.visible"
+          >
+            {{ error.text }}
+          </p>
+        }
+      </div>
+
+      <div class="user-form__field">
+        <app-text-field
+          [label]="isEditMode() ? 'Contraseña' : 'Contraseña inicial'"
+          inputId="user-password"
+          type="password"
+          autocomplete="new-password"
+          [refinedBorder]="true"
+          [field]="form.password"
+        />
+        <p class="field-hint">{{ passwordHint() }}</p>
+        @if (showErrors()) {
+          @let error = fieldErrorMarkup('password');
+          <p
+            class="field-error user-form__field-error"
+            [class.invisible]="!error.visible"
+            [attr.aria-hidden]="!error.visible"
+          >
+            {{ error.text }}
+          </p>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="user-form__section">
+    <h2 class="user-form__section-title">Datos personales</h2>
+    <div class="user-form__grid">
+      <div class="user-form__field">
+        <app-text-field
+          label="Nombre"
+          inputId="user-name"
+          autocomplete="given-name"
+          [refinedBorder]="true"
+          [field]="form.name"
+        />
+        @if (showErrors()) {
+          @let error = fieldErrorMarkup('name');
+          <p
+            class="field-error user-form__field-error"
+            [class.invisible]="!error.visible"
+            [attr.aria-hidden]="!error.visible"
+          >
+            {{ error.text }}
+          </p>
+        }
+      </div>
+
+      <div class="user-form__field">
+        <app-text-field
+          label="Apellido"
+          inputId="user-last-name"
+          autocomplete="family-name"
+          [refinedBorder]="true"
+          [field]="form.lastName"
+        />
+      </div>
+
+      <div class="user-form__field">
+        <app-select-field label="Estado" selectId="user-active" [field]="form.isActive">
+          @for (option of activeOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </app-select-field>
+      </div>
+    </div>
+  </section>
+
+  <section class="user-form__section">
+    <div class="user-form__section-header">
+      <h2 class="user-form__section-title">Roles</h2>
+      <button
+        class="btn btn-soft btn-sm"
+        type="button"
+        [disabled]="disabled()"
+        (click)="addRoleRow()"
+      >
+        Agregar rol
+      </button>
+    </div>
+
+    @if (showErrors() && fieldError('roles'); as rolesError) {
+      <div class="alert alert-error text-sm" role="alert">{{ rolesError }}</div>
+    }
+
+    <div class="user-form__roles">
+      @for (row of roleRows(); track $index) {
+        <div class="user-form__role-row">
+          <div class="user-form__field">
+            <label class="field-label" [for]="'user-role-' + $index">Rol</label>
+            <select
+              class="select select-bordered mt-2 w-full bg-white text-sm"
+              [id]="'user-role-' + $index"
+              [disabled]="disabled()"
+              [value]="row.roleId"
+              (change)="onRoleChange($index, $any($event.target).value)"
+            >
+              <option value="">Selecciona un rol</option>
+              @for (role of roleOptions(); track role.id) {
+                <option [value]="role.id">{{ roleLabel(role) }}</option>
+              }
+            </select>
+          </div>
+
+          @if (row.roleId && !isGlobalRole(row.roleId)) {
+            <div class="user-form__field">
+              <label class="field-label" [for]="'user-center-' + $index">Centro</label>
+              <select
+                class="select select-bordered mt-2 w-full bg-white text-sm"
+                [id]="'user-center-' + $index"
+                [disabled]="disabled()"
+                [value]="row.centerId"
+                (change)="onCenterChange($index, $any($event.target).value)"
+              >
+                <option value="">Selecciona un centro</option>
+                @for (center of centerOptions(); track center.id) {
+                  <option [value]="center.id" [title]="center.name">{{ center.name }}</option>
+                }
+              </select>
+            </div>
+          } @else if (row.roleId) {
+            <p class="user-form__global-role-hint">Rol global — aplica a todo el dashboard.</p>
+          }
+
+          <button
+            class="btn btn-ghost btn-sm text-error user-form__remove-role"
+            type="button"
+            [disabled]="disabled() || roleRows().length <= 1"
+            (click)="removeRoleRow($index)"
+          >
+            Quitar
+          </button>
+        </div>
+      }
+    </div>
+  </section>
+
+  <div class="user-form__actions">
+    <button
+      class="btn btn-primary min-h-12 px-4 shadow-sm transition-shadow hover:shadow-md"
+      type="submit"
+      [disabled]="disabled()"
+    >
+      {{ submitLabel() }}
+    </button>
+  </div>
+</form>

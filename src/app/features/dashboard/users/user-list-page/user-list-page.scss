@@ -1,0 +1,22 @@
+.user-list-page__results {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.user-list-page__results--refreshing {
+  opacity: 0.72;
+}
+
+.user-list-page__refreshing-label {
+  color: rgb(100 116 139);
+  font-size: 0.875rem;
+}
+
+.user-list-page__pagination {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+}

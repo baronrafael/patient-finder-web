@@ -1,3 +1,69 @@
 <app-page-shell>
-  <app-page-header title="Usuarios" subtitle="Gestión de voluntarios — Fase 5." />
+  <app-page-header title="Usuarios" subtitle="Gestión de voluntarios con acceso al dashboard.">
+    @if (permissions.can('users:create')) {
+      <a class="btn btn-primary" [routerLink]="paths.userNew">Nuevo voluntario</a>
+    }
+  </app-page-header>
+
+  @if (store.initialLoading()) {
+    <app-loading-skeleton />
+  } @else if (store.error(); as message) {
+    <app-error-state [message]="message" (retry)="store.retry()" />
+  } @else if (store.isEmpty()) {
+    <app-empty-state
+      title="Sin voluntarios"
+      message="No hay usuarios registrados todavía."
+    />
+  } @else if (store.hasItems()) {
+    <div
+      class="user-list-page__results"
+      [class.user-list-page__results--refreshing]="store.refreshing()"
+    >
+      @if (store.refreshing()) {
+        <p class="user-list-page__refreshing-label" aria-live="polite">Actualizando…</p>
+      }
+
+      <app-user-list-table
+        [items]="store.items()"
+        [userDetailPath]="paths.userDetail"
+        [deletingId]="store.deletingId()"
+        (deleteRequested)="onDeleteRequested($event)"
+      />
+
+      <nav
+        class="user-list-page__pagination"
+        aria-label="Paginación de usuarios"
+        [attr.aria-busy]="store.refreshing()"
+      >
+        <p class="text-sm text-slate-600">{{ store.pageSummary() }}</p>
+        <div class="flex gap-2">
+          <button
+            class="btn btn-soft btn-sm"
+            type="button"
+            [disabled]="store.refreshing() || store.currentPage() <= 1"
+            (click)="store.goToPage(store.currentPage() - 1)"
+          >
+            Anterior
+          </button>
+          <button
+            class="btn btn-soft btn-sm"
+            type="button"
+            [disabled]="store.refreshing() || store.currentPage() >= store.totalPages()"
+            (click)="store.goToPage(store.currentPage() + 1)"
+          >
+            Siguiente
+          </button>
+        </div>
+      </nav>
+    </div>
+  }
 </app-page-shell>
+
+<app-delete-user-dialog
+  [open]="deleteDialogOpen()"
+  [userName]="deleteTarget()?.fullName ?? ''"
+  [loading]="store.deletingId() !== null"
+  [errorMessage]="store.deleteError()"
+  (confirmed)="onDeleteConfirmed()"
+  (dismissed)="onDeleteDismissed()"
+/>
