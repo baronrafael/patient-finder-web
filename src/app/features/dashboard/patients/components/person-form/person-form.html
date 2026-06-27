@@ -1,0 +1,282 @@
+<form class="person-form" (submit)="onSubmit($event)">
+  @if (hasIdentityError()) {
+    <div class="alert alert-error text-sm" role="alert">{{ fieldError('identity') }}</div>
+  }
+
+  <section class="person-form__section">
+    <h2 class="person-form__section-title">Identificación</h2>
+    <div class="person-form__grid">
+      <div class="person-form__field">
+        <app-text-field
+          label="Nombres"
+          inputId="person-first-name"
+          autocomplete="given-name"
+          [refinedBorder]="true"
+          [field]="form.firstName"
+        />
+        @if (showErrors()) {
+          @let error = fieldErrorMarkup('firstName');
+          <p
+            class="field-error person-form__field-error"
+            [class.invisible]="!error.visible"
+            [attr.aria-hidden]="!error.visible"
+          >
+            {{ error.text }}
+          </p>
+        }
+      </div>
+
+      <div class="person-form__field">
+        <app-text-field
+          label="Apellidos"
+          inputId="person-last-name"
+          autocomplete="family-name"
+          [refinedBorder]="true"
+          [field]="form.lastName"
+          (blurred)="onLastNameBlur()"
+        />
+        @if (showErrors()) {
+          @let error = fieldErrorMarkup('lastName');
+          <p
+            class="field-error person-form__field-error"
+            [class.invisible]="!error.visible"
+            [attr.aria-hidden]="!error.visible"
+          >
+            {{ error.text }}
+          </p>
+        }
+      </div>
+
+      <div class="person-form__field">
+        <app-text-field
+          label="Cédula"
+          inputId="person-cedula"
+          autocomplete="off"
+          placeholder="Ej. 28443736"
+          [refinedBorder]="true"
+          [field]="form.cedula"
+          (blurred)="onCedulaBlur()"
+        />
+        @if (showErrors()) {
+          @let error = fieldErrorMarkup('cedula');
+          <p
+            class="field-error person-form__field-error"
+            [class.invisible]="!error.visible"
+            [attr.aria-hidden]="!error.visible"
+          >
+            {{ error.text }}
+          </p>
+        }
+      </div>
+
+      <div class="person-form__field">
+        <app-select-field label="Sexo" selectId="person-sex" [field]="form.sex">
+          @for (option of sexOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </app-select-field>
+        @if (showErrors()) {
+          @let error = fieldErrorMarkup('sex');
+          <p
+            class="field-error person-form__field-error"
+            [class.invisible]="!error.visible"
+            [attr.aria-hidden]="!error.visible"
+          >
+            {{ error.text }}
+          </p>
+        }
+      </div>
+
+      <div class="person-form__field">
+        <app-text-field
+          label="Edad aproximada"
+          inputId="person-age"
+          type="number"
+          autocomplete="off"
+          placeholder="Ej. 45"
+          [refinedBorder]="true"
+          [field]="form.ageApprox"
+        />
+        @if (showErrors()) {
+          @let error = fieldErrorMarkup('ageApprox');
+          <p
+            class="field-error person-form__field-error"
+            [class.invisible]="!error.visible"
+            [attr.aria-hidden]="!error.visible"
+          >
+            {{ error.text }}
+          </p>
+        }
+      </div>
+    </div>
+    <p class="field-hint">Indica cédula o nombres y apellidos.</p>
+  </section>
+
+  <section class="person-form__section">
+    <h2 class="person-form__section-title">Estado clínico</h2>
+    <div class="person-form__grid">
+      <div class="person-form__field">
+        <app-select-field label="Estado" selectId="person-status" [field]="form.status">
+          @for (option of statusOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </app-select-field>
+        @if (showErrors()) {
+          @let error = fieldErrorMarkup('status');
+          <p
+            class="field-error person-form__field-error"
+            [class.invisible]="!error.visible"
+            [attr.aria-hidden]="!error.visible"
+          >
+            {{ error.text }}
+          </p>
+        }
+      </div>
+
+      <div class="person-form__field">
+        <app-text-field
+          label="Fecha de ingreso"
+          inputId="person-admitted-at"
+          type="datetime-local"
+          [refinedBorder]="true"
+          [field]="form.admittedAt"
+        />
+        @if (showErrors()) {
+          @let error = fieldErrorMarkup('admittedAt');
+          <p
+            class="field-error person-form__field-error"
+            [class.invisible]="!error.visible"
+            [attr.aria-hidden]="!error.visible"
+          >
+            {{ error.text }}
+          </p>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="person-form__section">
+    <h2 class="person-form__section-title">Lugar de rescate</h2>
+    <div class="person-form__grid">
+      <div class="person-form__field">
+        <app-select-field label="Estado" selectId="person-rescue-estado" [field]="form.rescueEstadoId">
+          <option value="">Selecciona un estado</option>
+          @for (estado of estados(); track estado.id) {
+            <option [value]="estado.id" [title]="estado.name">{{ estado.name }}</option>
+          }
+        </app-select-field>
+        @if (showErrors()) {
+          @let error = fieldErrorMarkup('rescueEstadoId');
+          <p
+            class="field-error person-form__field-error"
+            [class.invisible]="!error.visible"
+            [attr.aria-hidden]="!error.visible"
+          >
+            {{ error.text }}
+          </p>
+        }
+      </div>
+
+      <div class="person-form__field">
+        <app-select-field
+          label="Municipio"
+          selectId="person-rescue-municipio"
+          [field]="form.rescueMunicipioId"
+          [describedBy]="municipioDisabled() ? 'person-rescue-municipio-hint' : null"
+          [hint]="municipioDisabled() ? 'Selecciona un estado primero.' : null"
+        >
+          <option value="">Selecciona un municipio</option>
+          @for (municipio of municipios(); track municipio.id) {
+            <option [value]="municipio.id" [title]="municipio.name">{{ municipio.name }}</option>
+          }
+        </app-select-field>
+        @if (showErrors()) {
+          @let error = fieldErrorMarkup('rescueMunicipioId');
+          <p
+            class="field-error person-form__field-error"
+            [class.invisible]="!error.visible"
+            [attr.aria-hidden]="!error.visible"
+          >
+            {{ error.text }}
+          </p>
+        }
+      </div>
+
+      <div class="person-form__field">
+        <app-select-field
+          label="Parroquia"
+          selectId="person-rescue-parroquia"
+          [field]="form.rescueParroquiaId"
+          [describedBy]="parroquiaDisabled() ? 'person-rescue-parroquia-hint' : null"
+          [hint]="parroquiaDisabled() ? 'Selecciona un municipio primero.' : null"
+        >
+          <option value="">Sin especificar</option>
+          @for (parroquia of parroquias(); track parroquia.id) {
+            <option [value]="parroquia.id" [title]="parroquia.name">{{ parroquia.name }}</option>
+          }
+        </app-select-field>
+      </div>
+    </div>
+  </section>
+
+  <section class="person-form__section">
+    <h2 class="person-form__section-title">Centro y contacto</h2>
+    <div class="person-form__grid">
+      <div class="person-form__field">
+        <app-select-field
+          label="Centro"
+          selectId="person-center"
+          [field]="form.centerId"
+          [hint]="lockCenter() ? 'Centro fijado según tu rol activo.' : null"
+          [describedBy]="lockCenter() ? 'person-center-hint' : null"
+        >
+          <option value="">Selecciona un centro</option>
+          @for (center of centerOptions(); track center.id) {
+            <option [value]="center.id" [title]="center.name">{{ center.name }}</option>
+          }
+        </app-select-field>
+        @if (showErrors()) {
+          @let error = fieldErrorMarkup('centerId');
+          <p
+            class="field-error person-form__field-error"
+            [class.invisible]="!error.visible"
+            [attr.aria-hidden]="!error.visible"
+          >
+            {{ error.text }}
+          </p>
+        }
+      </div>
+
+      <div class="person-form__field">
+        <app-text-field
+          label="Contacto"
+          inputId="person-contacts"
+          type="tel"
+          autocomplete="tel"
+          placeholder="Ej. +58 412-1234567"
+          [refinedBorder]="true"
+          [field]="form.contacts"
+        />
+      </div>
+    </div>
+
+    <div class="person-form__notes">
+      <label class="field-label" for="person-notes">Observaciones</label>
+      <textarea
+        id="person-notes"
+        class="textarea textarea-bordered mt-2 min-h-28 w-full bg-white text-sm"
+        [formField]="form.notes"
+      ></textarea>
+    </div>
+  </section>
+
+  <div class="person-form__actions">
+    <button
+      class="btn btn-primary min-h-12 px-4 shadow-sm transition-shadow hover:shadow-md"
+      type="submit"
+      [disabled]="disabled()"
+    >
+      {{ submitLabel() }}
+    </button>
+  </div>
+</form>

@@ -83,4 +83,27 @@ export interface ApiPersonListResponseDto {
     readonly persons: readonly ApiPersonDto[];
   };
   readonly pagination?: ApiPaginationDto;
+  readonly meta?: ApiPaginationDto;
+}
+
+export interface ApiPersonResponseDto {
+  readonly data: {
+    readonly person: ApiPersonDto;
+  };
+}
+
+export interface ApiPersonWriteDto {
+  readonly first_name?: string;
+  readonly last_name?: string;
+  readonly cedula?: string;
+  readonly sex?: 'M' | 'F';
+  readonly age_approx?: number;
+  readonly status?: string;
+  readonly admitted_at?: string;
+  readonly rescue_estado_id: string;
+  readonly rescue_municipio_id: string;
+  readonly rescue_parroquia_id?: string;
+  readonly center_id: string;
+  readonly contacts?: string;
+  readonly notes?: string;
 }

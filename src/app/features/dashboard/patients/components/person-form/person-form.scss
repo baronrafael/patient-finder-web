@@ -1,0 +1,47 @@
+.person-form {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.person-form__section {
+  display: grid;
+  gap: 1rem;
+}
+
+.person-form__section-title {
+  color: rgb(15 23 42);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.person-form__grid {
+  display: grid;
+  gap: 1rem;
+  align-items: start;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.person-form__field {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+  align-content: start;
+}
+
+.person-form__field-error {
+  min-height: 1.25rem;
+}
+
+.person-form__notes {
+  margin-top: 0.25rem;
+}
+
+.person-form__actions {
+  display: flex;
+  justify-content: flex-start;
+}

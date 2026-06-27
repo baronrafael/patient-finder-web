@@ -8,5 +8,6 @@
     [attr.autocomplete]="autocomplete()"
     [attr.placeholder]="placeholder()"
     [formField]="field()"
+    (blur)="blurred.emit()"
   />
 </div>

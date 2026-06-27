@@ -25,6 +25,10 @@
     @apply mt-1 text-xs text-slate-500;
   }
 
+  .field-error {
+    @apply mt-1 text-xs text-red-600;
+  }
+
   .field-control {
     @apply mt-2 min-h-11 w-full min-w-0 bg-white text-sm;
   }

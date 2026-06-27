@@ -1,3 +1,38 @@
 <app-page-shell>
-  <app-page-header title="Formulario de paciente" subtitle="Próximamente en Fase 3." />
+  <app-page-header [title]="pageTitle()" [subtitle]="pageSubtitle()">
+    <a class="btn btn-soft" [routerLink]="paths.patients">Volver a la lista</a>
+  </app-page-header>
+
+  @if (loadingPerson()) {
+    <app-loading-skeleton />
+  } @else if (loadError(); as message) {
+    <app-error-state [message]="message" (retry)="reloadPerson()" />
+  } @else if (initialValue(); as value) {
+    @if (saveError(); as error) {
+      <div class="alert alert-error mt-4 text-sm" role="alert">{{ error }}</div>
+    }
+
+    @if (duplicateCheckWarning(); as warning) {
+      <div class="alert alert-warning mt-4 text-sm" role="status">{{ warning }}</div>
+    }
+
+    <app-person-form
+      [initialValue]="value"
+      [centerOptions]="centerOptions()"
+      [lockCenter]="lockCenter()"
+      [submitLabel]="submitLabel()"
+      [disabled]="saving()"
+      (identityBlurred)="onIdentityBlurred($event)"
+      (submitted)="onSubmitted($event)"
+    />
+  }
+
+  <app-duplicate-warning-dialog
+    [open]="duplicateDialogOpen()"
+    [result]="duplicateResult()"
+    [confirmSubmit]="pendingSubmit() !== null"
+    (dismissed)="onDuplicateDismissed()"
+    (continueRegistration)="onDuplicateContinue()"
+    (editMatch)="onDuplicateEdit($event)"
+  />
 </app-page-shell>
