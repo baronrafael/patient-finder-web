@@ -15,7 +15,7 @@ import {
 } from 'rxjs';
 
 import { APP_CONFIG } from '../config/app-config.token';
-import { AUTH_STORAGE_KEYS } from './auth.constants';
+import { AUTH_STORAGE, AUTH_STORAGE_KEYS } from './auth.constants';
 import { buildAuthSession } from './auth.mapper';
 import {
   AuthMeResponseDto,
@@ -45,9 +45,9 @@ export class AuthService {
   readonly accessToken = computed(() => this.sessionState()?.accessToken ?? null);
 
   restoreSession(): Promise<void> {
-    const accessToken = sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken);
-    const refreshToken = sessionStorage.getItem(AUTH_STORAGE_KEYS.refreshToken);
-    const expiresAt = Number(sessionStorage.getItem(AUTH_STORAGE_KEYS.expiresAt) ?? 0);
+    const accessToken = AUTH_STORAGE.getItem(AUTH_STORAGE_KEYS.accessToken);
+    const refreshToken = AUTH_STORAGE.getItem(AUTH_STORAGE_KEYS.refreshToken);
+    const expiresAt = Number(AUTH_STORAGE.getItem(AUTH_STORAGE_KEYS.expiresAt) ?? 0);
 
     if (!accessToken || !refreshToken || !expiresAt) {
       return Promise.resolve();
@@ -153,9 +153,9 @@ export class AuthService {
   }
 
   private stageTokens(accessToken: string, refreshToken: string, expiresAt: number): void {
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, accessToken);
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, refreshToken);
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.expiresAt, String(expiresAt));
+    AUTH_STORAGE.setItem(AUTH_STORAGE_KEYS.accessToken, accessToken);
+    AUTH_STORAGE.setItem(AUTH_STORAGE_KEYS.refreshToken, refreshToken);
+    AUTH_STORAGE.setItem(AUTH_STORAGE_KEYS.expiresAt, String(expiresAt));
 
     const current = this.sessionState();
     if (current) {
@@ -179,17 +179,17 @@ export class AuthService {
   }
 
   private persistSession(session: AuthSession): void {
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, session.accessToken);
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, session.refreshToken);
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.expiresAt, String(session.expiresAt));
+    AUTH_STORAGE.setItem(AUTH_STORAGE_KEYS.accessToken, session.accessToken);
+    AUTH_STORAGE.setItem(AUTH_STORAGE_KEYS.refreshToken, session.refreshToken);
+    AUTH_STORAGE.setItem(AUTH_STORAGE_KEYS.expiresAt, String(session.expiresAt));
     this.sessionState.set(session);
   }
 
   private clearSession(): void {
-    sessionStorage.removeItem(AUTH_STORAGE_KEYS.accessToken);
-    sessionStorage.removeItem(AUTH_STORAGE_KEYS.refreshToken);
-    sessionStorage.removeItem(AUTH_STORAGE_KEYS.expiresAt);
-    sessionStorage.removeItem(AUTH_STORAGE_KEYS.activeCenterId);
+    AUTH_STORAGE.removeItem(AUTH_STORAGE_KEYS.accessToken);
+    AUTH_STORAGE.removeItem(AUTH_STORAGE_KEYS.refreshToken);
+    AUTH_STORAGE.removeItem(AUTH_STORAGE_KEYS.expiresAt);
+    AUTH_STORAGE.removeItem(AUTH_STORAGE_KEYS.activeCenterId);
     this.sessionState.set(null);
   }
 }

@@ -4,3 +4,5 @@ export const AUTH_STORAGE_KEYS = {
   expiresAt: 'terremoto_token_expires_at',
   activeCenterId: 'terremoto_active_center_id',
 } as const;
+
+export const AUTH_STORAGE: Storage = localStorage;

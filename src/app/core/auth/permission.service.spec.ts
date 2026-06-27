@@ -24,7 +24,7 @@ describe('PermissionService', () => {
 
   beforeEach(() => {
     session.set(null);
-    sessionStorage.clear();
+    localStorage.clear();
 
     TestBed.configureTestingModule({
       providers: [

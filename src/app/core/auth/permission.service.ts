@@ -1,6 +1,6 @@
 import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 
-import { AUTH_STORAGE_KEYS } from './auth.constants';
+import { AUTH_STORAGE, AUTH_STORAGE_KEYS } from './auth.constants';
 import { AuthService } from './auth.service';
 import { Permission, PERSON_PERMISSIONS, USER_PERMISSIONS } from './models/permission.model';
 
@@ -86,14 +86,14 @@ export class PermissionService {
     this.activeCenterIdState.set(centerId);
 
     if (centerId) {
-      sessionStorage.setItem(AUTH_STORAGE_KEYS.activeCenterId, centerId);
+      AUTH_STORAGE.setItem(AUTH_STORAGE_KEYS.activeCenterId, centerId);
       return;
     }
 
-    sessionStorage.removeItem(AUTH_STORAGE_KEYS.activeCenterId);
+    AUTH_STORAGE.removeItem(AUTH_STORAGE_KEYS.activeCenterId);
   }
 
   private readStoredCenterId(): string | null {
-    return sessionStorage.getItem(AUTH_STORAGE_KEYS.activeCenterId);
+    return AUTH_STORAGE.getItem(AUTH_STORAGE_KEYS.activeCenterId);
   }
 }
