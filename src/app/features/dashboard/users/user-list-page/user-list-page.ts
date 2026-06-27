@@ -28,6 +28,7 @@ import { UserListStore } from '../state/user-list.store';
   ],
   providers: [provideUserAdminRepository(), UserListStore],
   templateUrl: './user-list-page.html',
+  styleUrl: './user-list-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserListPage {
