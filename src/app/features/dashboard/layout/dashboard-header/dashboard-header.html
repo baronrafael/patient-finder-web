@@ -4,6 +4,7 @@
   </div>
 
   <div class="dashboard-header__actions">
+    <a class="btn btn-soft btn-sm" [routerLink]="publicPath">Buscador público</a>
     @if (user(); as currentUser) {
       <a class="dashboard-header__user" [routerLink]="paths.profile">{{ currentUser.name || currentUser.email }}</a>
     }

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, output } from '@angular/cor
 import { RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../../core/auth/auth.service';
+import { APP_PATHS } from '../../../../core/routing/app.paths';
 import { DASHBOARD_PATHS } from '../../../../core/routing/dashboard.paths';
 
 @Component({
@@ -16,5 +17,6 @@ export class DashboardHeader {
 
   readonly user = this.auth.user;
   readonly paths = DASHBOARD_PATHS;
+  readonly publicPath = APP_PATHS.home;
   readonly logout = output<void>();
 }
