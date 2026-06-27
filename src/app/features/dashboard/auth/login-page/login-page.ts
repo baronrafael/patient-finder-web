@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { form } from '@angular/forms/signals';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { AuthService } from '../../../../core/auth/auth.service';
-import { DASHBOARD_PATHS } from '../../../../core/routing/dashboard.paths';
+import { resolveDefaultDashboardPath } from '../../../../core/auth/dashboard-navigation.utils';
+import { PermissionService } from '../../../../core/auth/permission.service';
 import { TextField } from '../../../../shared/components/text-field/text-field';
 
 @Component({
@@ -15,6 +17,7 @@ import { TextField } from '../../../../shared/components/text-field/text-field';
 })
 export class LoginPage {
   private readonly auth = inject(AuthService);
+  private readonly permissions = inject(PermissionService);
   private readonly router = inject(Router);
 
   readonly loading = this.auth.loading;
@@ -36,9 +39,25 @@ export class LoginPage {
 
     try {
       await this.auth.login(email.trim(), password);
-      await this.router.navigate([DASHBOARD_PATHS.patients]);
-    } catch {
-      this.errorMessage.set('Credenciales incorrectas. Verifica tu email y contraseña.');
+      await this.router.navigate([resolveDefaultDashboardPath(this.permissions)]);
+    } catch (error) {
+      this.errorMessage.set(this.resolveLoginError(error));
     }
+  }
+
+  private resolveLoginError(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      if (error.status === 401) {
+        return 'Credenciales incorrectas. Verifica tu email y contraseña.';
+      }
+
+      if (error.status === 0) {
+        return 'No pudimos conectar con el servidor. Intenta de nuevo.';
+      }
+
+      return 'No se pudo completar el inicio de sesión. Intenta de nuevo.';
+    }
+
+    return 'No se pudo completar el inicio de sesión. Intenta de nuevo.';
   }
 }

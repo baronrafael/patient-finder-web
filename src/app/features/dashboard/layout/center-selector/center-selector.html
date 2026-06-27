@@ -6,7 +6,11 @@
       [value]="activeCenterId() ?? ''"
       (change)="onCenterChange($event)"
     >
-      <option value="">Todos los centros</option>
+      @if (canListAllCenters()) {
+        <option value="">Todos los centros</option>
+      } @else if (!activeCenterId()) {
+        <option value="" disabled selected>Selecciona un centro</option>
+      }
       @for (center of centerOptions(); track center.id) {
         <option [value]="center.id">{{ center.name }}</option>
       }

@@ -25,9 +25,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   const token = auth.accessToken();
-  const authedReq = token
-    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
-    : req;
+  const hasAuthorizationHeader = req.headers.has('Authorization');
+  const authedReq =
+    !hasAuthorizationHeader && token
+      ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+      : req;
 
   return next(authedReq).pipe(
     catchError((error: unknown) => {

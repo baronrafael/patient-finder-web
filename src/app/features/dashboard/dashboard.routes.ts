@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
 
-import { authGuard, guestGuard, permissionGuard } from '../../core/auth/auth.guards';
-import { USER_PERMISSIONS } from '../../core/auth/models/permission.model';
+import { authGuard, defaultDashboardGuard, guestGuard, permissionGuard } from '../../core/auth/auth.guards';
 import { DashboardLayout } from './layout/dashboard-layout/dashboard-layout';
+import { DashboardDefaultPage } from './layout/dashboard-default-page/dashboard-default-page';
 
 export const dashboardRoutes: Routes = [
   {
@@ -17,31 +17,33 @@ export const dashboardRoutes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'pacientes',
         pathMatch: 'full',
+        canActivate: [defaultDashboardGuard],
+        component: DashboardDefaultPage,
       },
       {
         path: 'pacientes',
         loadComponent: () =>
           import('./patients/patient-list-page/patient-list-page').then((m) => m.PatientListPage),
+        canActivate: [permissionGuard('patients:read')],
       },
       {
         path: 'pacientes/nuevo',
         loadComponent: () =>
           import('./patients/patient-form-page/patient-form-page').then((m) => m.PatientFormPage),
-        canActivate: [permissionGuard('persons.create')],
+        canActivate: [permissionGuard('patients:create')],
       },
       {
         path: 'pacientes/:id',
         loadComponent: () =>
           import('./patients/patient-form-page/patient-form-page').then((m) => m.PatientFormPage),
-        canActivate: [permissionGuard('persons.edit')],
+        canActivate: [permissionGuard('patients:update')],
       },
       {
         path: 'usuarios',
         loadComponent: () =>
           import('./users/user-list-page/user-list-page').then((m) => m.UserListPage),
-        canActivate: [permissionGuard(...USER_PERMISSIONS)],
+        canActivate: [permissionGuard('users:read')],
       },
       {
         path: 'perfil',

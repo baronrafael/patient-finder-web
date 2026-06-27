@@ -5,7 +5,9 @@ import {
   catchError,
   finalize,
   firstValueFrom,
+  forkJoin,
   map,
+  of,
   shareReplay,
   switchMap,
   tap,
@@ -20,8 +22,12 @@ import {
   AuthTokensResponseDto,
   LoginRequestDto,
   RefreshAccessTokenRequestDto,
+  RolesCatalogResponseDto,
+  UserRolesResponseDto,
 } from './models/auth-api.dto';
 import { AuthSession } from './models/auth-session.model';
+
+const EMPTY_ROLE_CATALOG: RolesCatalogResponseDto = { data: { roles: [] } };
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -47,7 +53,7 @@ export class AuthService {
       return Promise.resolve();
     }
 
-    return firstValueFrom(this.loadMe(accessToken, refreshToken, expiresAt))
+    return firstValueFrom(this.loadSession(accessToken, refreshToken, expiresAt))
       .then(() => undefined)
       .catch(() => {
         this.clearSession();
@@ -55,6 +61,7 @@ export class AuthService {
   }
 
   async login(email: string, password: string): Promise<void> {
+    this.clearSession();
     this.loadingState.set(true);
 
     try {
@@ -65,7 +72,10 @@ export class AuthService {
         } satisfies LoginRequestDto),
       );
 
-      await firstValueFrom(this.loadMeFromTokens(response.data));
+      await firstValueFrom(this.loadSessionFromTokens(response.data));
+    } catch (error) {
+      this.clearSession();
+      throw error;
     } finally {
       this.loadingState.set(false);
     }
@@ -90,7 +100,7 @@ export class AuthService {
     this.refreshInFlight = this.http
       .post<AuthTokensResponseDto>(`${this.config.apiBaseUrl}/auth/refresh`, body)
       .pipe(
-        switchMap((response) => this.loadMeFromTokens(response.data)),
+        switchMap((response) => this.loadSessionFromTokens(response.data)),
         catchError((error) => {
           this.clearSession();
           return throwError(() => error);
@@ -104,27 +114,68 @@ export class AuthService {
     return this.refreshInFlight;
   }
 
-  private loadMeFromTokens(tokens: AuthTokensResponseDto['data']): Observable<AuthSession> {
-    return this.loadMe(
+  private loadSessionFromTokens(tokens: AuthTokensResponseDto['data']): Observable<AuthSession> {
+    return this.loadSession(
       tokens.access_token,
       tokens.refresh_token,
       Date.now() + tokens.expires_in * 1000,
     );
   }
 
-  private loadMe(
+  private loadSession(
     accessToken: string,
     refreshToken: string,
     expiresAt: number,
   ): Observable<AuthSession> {
-    return this.http
-      .get<AuthMeResponseDto>(`${this.config.apiBaseUrl}/users/me`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      })
-      .pipe(
-        map((response) => buildAuthSession(accessToken, refreshToken, expiresAt, response)),
-        tap((session) => this.persistSession(session)),
-      );
+    this.stageTokens(accessToken, refreshToken, expiresAt);
+
+    const baseUrl = this.config.apiBaseUrl;
+
+    return forkJoin({
+      me: this.http.get<AuthMeResponseDto>(`${baseUrl}/users/me`),
+      userRoles: this.http.get<UserRolesResponseDto>(`${baseUrl}/users/me/roles`),
+      roleCatalog: this.http
+        .get<RolesCatalogResponseDto>(`${baseUrl}/roles`)
+        .pipe(catchError(() => of(EMPTY_ROLE_CATALOG))),
+    }).pipe(
+      map(({ me, userRoles, roleCatalog }) =>
+        buildAuthSession(
+          accessToken,
+          refreshToken,
+          expiresAt,
+          me,
+          userRoles.data.roles ?? [],
+          roleCatalog.data.roles ?? [],
+        ),
+      ),
+      tap((session) => this.persistSession(session)),
+    );
+  }
+
+  private stageTokens(accessToken: string, refreshToken: string, expiresAt: number): void {
+    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, accessToken);
+    sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, refreshToken);
+    sessionStorage.setItem(AUTH_STORAGE_KEYS.expiresAt, String(expiresAt));
+
+    const current = this.sessionState();
+    if (current) {
+      this.sessionState.set({
+        ...current,
+        accessToken,
+        refreshToken,
+        expiresAt,
+      });
+      return;
+    }
+
+    this.sessionState.set({
+      accessToken,
+      refreshToken,
+      expiresAt,
+      user: { id: '', email: '', name: '' },
+      globalPermissions: [],
+      centerPermissions: {},
+    });
   }
 
   private persistSession(session: AuthSession): void {

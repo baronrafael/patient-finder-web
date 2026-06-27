@@ -3,7 +3,7 @@
     title="Pacientes"
     subtitle="Lista de registros digitalizados por centro."
   >
-    @if (permissions.can('persons.create')) {
+    @if (permissions.can('patients:create')) {
       <a class="btn btn-primary" [routerLink]="paths.patientNew">Nuevo paciente</a>
     }
   </app-page-header>

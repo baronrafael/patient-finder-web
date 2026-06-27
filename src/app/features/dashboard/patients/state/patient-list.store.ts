@@ -77,8 +77,8 @@ export class PatientListStore {
   readonly items = computed(() =>
     (this.result()?.items ?? []).map((row) => ({
       ...row,
-      canEdit: this.permissions.can('persons.edit', row.centerId),
-      canDelete: this.permissions.can('persons.delete', row.centerId),
+      canEdit: this.permissions.can('patients:update', row.centerId),
+      canDelete: this.permissions.can('patients:delete', row.centerId),
     })),
   );
   readonly total = computed(() => this.result()?.total ?? 0);

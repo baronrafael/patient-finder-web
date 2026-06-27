@@ -25,6 +25,10 @@ export class PermissionService {
 
   readonly hasMultipleCenters = computed(() => this.availableCenterIds().length > 1);
 
+  readonly canListAllCenters = computed(
+    () => this.auth.session()?.globalPermissions.includes('patients:read') ?? false,
+  );
+
   readonly canAccessPatients = computed(() => this.canAny(PERSON_PERMISSIONS));
   readonly canAccessUsers = computed(() => this.canAny(USER_PERMISSIONS));
 

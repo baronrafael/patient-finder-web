@@ -18,6 +18,7 @@ export class CenterSelector {
 
   readonly showSelector = this.permissions.hasMultipleCenters;
   readonly activeCenterId = this.permissions.activeCenterId;
+  readonly canListAllCenters = this.permissions.canListAllCenters;
 
   readonly centerOptions = computed(() => {
     const labels = Object.fromEntries(this.hospitals().map((hospital) => [hospital.id, hospital.name]));
