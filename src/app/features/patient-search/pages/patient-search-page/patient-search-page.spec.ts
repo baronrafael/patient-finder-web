@@ -18,7 +18,7 @@ import { PatientSearchPage } from './patient-search-page';
 
 const updatedAt = '2026-06-25T20:00:00-04:00';
 
-function createPatient(id: string): PatientRecord {
+function createPatient(id: string, score: number | null = null): PatientRecord {
   return {
     id,
     sourceRow: 0,
@@ -31,12 +31,16 @@ function createPatient(id: string): PatientRecord {
     hospitalId: 'hospital-a',
     hospitalName: 'Hospital A',
     sourceHospitalName: 'Hospital A',
+    score,
+    matchConfidence: null,
   };
 }
 
 function createSearchResult(page: number, ids: readonly string[]): PatientSearchResult {
   return {
-    items: ids.map(createPatient),
+    items: ids.map((id, index) =>
+      createPatient(id, page === 1 ? 100 - index * 5 : 70 - index * 5),
+    ),
     total: 40,
     page,
     pageSize: PATIENT_SEARCH_PAGE_SIZE,

@@ -19,6 +19,16 @@
         @if (isExactDocumentMatch()) {
           <span class="patient-card__exact-badge">Coincidencia exacta</span>
         }
+        @if (matchConfidenceBadge(); as badgeLabel) {
+          <span
+            class="patient-card__match-badge"
+            [class.patient-card__match-badge--high]="matchConfidenceLevel() === 'high'"
+            [class.patient-card__match-badge--medium]="matchConfidenceLevel() === 'medium'"
+            [class.patient-card__match-badge--low]="matchConfidenceLevel() === 'low'"
+          >
+            {{ badgeLabel }}
+          </span>
+        }
       </div>
     </div>
   </header>

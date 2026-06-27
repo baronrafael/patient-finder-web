@@ -22,10 +22,21 @@
       Ayuda a localizar familiares reportados en hospitales y centros de atención.
     </p>
     @if (updatedAt(); as updatedLabel) {
-      <p class="app-header__updated">
-        <span class="app-header__updated-badge">Lista actualizada</span>
-        <span>{{ updatedLabel }}</span>
-      </p>
+      <div class="app-header__updated" role="status" aria-live="polite">
+        <div class="app-header__updated-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </div>
+        <div class="app-header__updated-body">
+          <p class="app-header__updated-label">Lista actualizada</p>
+          <p class="app-header__updated-date">{{ updatedLabel }}</p>
+        </div>
+      </div>
     } @else {
       <p class="app-header__updated app-header__updated--pending">Cargando fecha de actualización...</p>
     }

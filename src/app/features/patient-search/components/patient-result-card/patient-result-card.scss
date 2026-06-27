@@ -90,6 +90,35 @@
   text-transform: uppercase;
 }
 
+.patient-card__match-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.patient-card__match-badge--high {
+  border: 1px solid rgb(167 243 208);
+  background: rgb(236 253 245);
+  color: rgb(6 95 70);
+}
+
+.patient-card__match-badge--medium {
+  border: 1px solid rgb(253 230 138);
+  background: rgb(255 251 235);
+  color: rgb(146 64 14);
+}
+
+.patient-card__match-badge--low {
+  border: 1px solid rgb(226 232 240);
+  background: rgb(248 250 252);
+  color: rgb(71 85 105);
+}
+
 .patient-card__location {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);

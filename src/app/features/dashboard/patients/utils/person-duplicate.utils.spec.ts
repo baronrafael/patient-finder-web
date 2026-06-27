@@ -20,9 +20,11 @@ const basePatient = (overrides: Partial<PatientRecord> = {}): PatientRecord => (
   address: 'Petare, Sucre, Miranda',
   observations: null,
   hospitalId: 'center-1',
-  hospitalName: 'Hospital Central',
-  sourceHospitalName: 'Hospital Central',
-  ...overrides,
+    hospitalName: 'Hospital Central',
+    sourceHospitalName: 'Hospital Central',
+    score: null,
+    matchConfidence: null,
+    ...overrides,
 });
 
 const baseForm = (overrides: Partial<PersonFormValue> = {}): PersonFormValue => ({

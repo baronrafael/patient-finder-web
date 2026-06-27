@@ -1,3 +1,5 @@
+export type MatchConfidenceLevel = 'high' | 'medium' | 'low';
+
 export interface PatientRecord {
   readonly id: string;
   readonly sourceRow: number;
@@ -10,4 +12,6 @@ export interface PatientRecord {
   readonly hospitalId: string;
   readonly hospitalName: string;
   readonly sourceHospitalName: string;
+  readonly score: number | null;
+  readonly matchConfidence: MatchConfidenceLevel | null;
 }

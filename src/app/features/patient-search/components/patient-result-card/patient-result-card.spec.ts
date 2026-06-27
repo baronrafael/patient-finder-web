@@ -17,6 +17,8 @@ function createPatient(overrides: Partial<PatientRecord> = {}): PatientRecord {
     hospitalId: 'hospital-a',
     hospitalName: 'Hospital A',
     sourceHospitalName: 'Hospital A',
+    score: null,
+    matchConfidence: null,
     ...overrides,
   };
 }
@@ -123,6 +125,42 @@ describe('PatientResultCard', () => {
     expect(
       compiled.querySelector<HTMLButtonElement>('.patient-card__details-toggle')?.getAttribute('aria-expanded'),
     ).toBe('false');
+  });
+
+  it('shows exact document badge and hides score badge when cedula matches', async () => {
+    const fixture = TestBed.createComponent(PatientResultCard);
+
+    fixture.componentRef.setInput(
+      'patient',
+      createPatient({
+        identityDocument: '28443736',
+        matchConfidence: 'high',
+      }),
+    );
+    fixture.componentRef.setInput('query', '28443736');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Coincidencia exacta');
+    expect(compiled.textContent).not.toContain('Coincidencia alta');
+  });
+
+  it('shows score confidence badge when provided', async () => {
+    const fixture = TestBed.createComponent(PatientResultCard);
+
+    fixture.componentRef.setInput(
+      'patient',
+      createPatient({
+        matchConfidence: 'medium',
+      }),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Coincidencia media');
+    expect(compiled.textContent).not.toContain('Coincidencia exacta');
   });
 
   it('highlights observations when secondary details are expanded', async () => {

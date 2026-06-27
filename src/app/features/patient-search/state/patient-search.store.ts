@@ -1,7 +1,7 @@
 import { DestroyRef, Injectable, afterNextRender, computed, effect, inject, linkedSignal, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed, rxResource } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EMPTY, Subject, catchError, finalize, of, switchMap, tap } from 'rxjs';
+import { EMPTY, Subject, catchError, finalize, forkJoin, map, of, switchMap, tap } from 'rxjs';
 
 import { mapHttpError } from '../../../core/http/http-error.mapper';
 import { APP_CONFIG } from '../../../core/config/app-config.token';
@@ -17,6 +17,10 @@ import { PatientFilters } from '../models/patient-filters.model';
 import { PatientSearchQuery } from '../models/patient-search-query.model';
 import { PatientSearchResult } from '../models/patient-search-result.model';
 import { PatientSex } from '../models/patient-sex.model';
+import {
+  enrichPatientsWithMatchConfidence,
+  resolveSearchMaxScoreFromItems,
+} from '../utils/match-score.utils';
 import { isSearchActive } from '../utils/patient-search.matcher';
 import {
   filterHospitalsByLocation,
@@ -74,6 +78,7 @@ export class PatientSearchStore {
   readonly result = signal<PatientSearchResult | null>(null);
   readonly hasSearched = signal(false);
   readonly lastUpdatedAt = signal<string | null>(null);
+  private readonly searchMaxScore = signal<number | null>(null);
 
   readonly hospitalsResource = rxResource({
     params: () => this.filtersCatalogLoaded(),
@@ -285,6 +290,7 @@ export class PatientSearchStore {
       this.clearDebouncedSearch();
       this.hasSearched.set(false);
       this.result.set(null);
+      this.resetSearchMaxScore();
       this.error.set(null);
       this.resetSelectionFilters();
       this.syncUrlToState();
@@ -295,6 +301,7 @@ export class PatientSearchStore {
       this.clearDebouncedSearch();
       this.hasSearched.set(false);
       this.result.set(null);
+      this.resetSearchMaxScore();
       this.error.set(null);
       this.syncUrlToState();
       return;
@@ -335,6 +342,7 @@ export class PatientSearchStore {
     this.page.set(1);
     this.hasSearched.set(false);
     this.result.set(null);
+    this.resetSearchMaxScore();
     this.error.set(null);
     this.syncUrlToState();
   }
@@ -471,7 +479,7 @@ export class PatientSearchStore {
 
           this.slowSearchTimer = setTimeout(() => this.slowSearch.set(true), SLOW_SEARCH_THRESHOLD_MS);
 
-          return this.repository.search(this.buildSearchQuery()).pipe(
+          return this.resolveSearchRequest(this.buildSearchQuery()).pipe(
             tap((searchResult) => {
               this.applySearchResult(searchResult);
               this.lastUpdatedAt.set(searchResult.updatedAt);
@@ -692,24 +700,68 @@ export class PatientSearchStore {
   }
 
   private applySearchResult(searchResult: PatientSearchResult): void {
+    const maxScore = resolveSearchMaxScoreFromItems(
+      searchResult.items,
+      searchResult.page,
+      this.searchMaxScore(),
+    );
+    this.searchMaxScore.set(maxScore);
+
+    const enrichedResult: PatientSearchResult = {
+      ...searchResult,
+      items: enrichPatientsWithMatchConfidence(searchResult.items, maxScore),
+    };
+
     if (this.page() <= 1) {
-      this.result.set(searchResult);
+      this.result.set(enrichedResult);
       return;
     }
 
     const previous = this.result();
     if (!previous) {
-      this.result.set(searchResult);
+      this.result.set(enrichedResult);
       return;
     }
 
     const seenIds = new Set(previous.items.map((item) => item.id));
-    const nextItems = searchResult.items.filter((item) => !seenIds.has(item.id));
+    const nextItems = enrichedResult.items.filter((item) => !seenIds.has(item.id));
 
     this.result.set({
-      ...searchResult,
+      ...enrichedResult,
       items: [...previous.items, ...nextItems],
     });
+  }
+
+  private resolveSearchRequest(query: PatientSearchQuery) {
+    const needsMaxScore = query.page > 1 && this.searchMaxScore() == null;
+
+    if (!needsMaxScore) {
+      return this.repository.search(query);
+    }
+
+    const maxScoreQuery: PatientSearchQuery = {
+      ...query,
+      page: 1,
+      pageSize: 1,
+    };
+
+    return forkJoin({
+      searchResult: this.repository.search(query),
+      maxScoreResult: this.repository.search(maxScoreQuery),
+    }).pipe(
+      map(({ searchResult, maxScoreResult }) => {
+        const maxScore = maxScoreResult.items[0]?.score ?? null;
+        if (maxScore != null) {
+          this.searchMaxScore.set(maxScore);
+        }
+
+        return searchResult;
+      }),
+    );
+  }
+
+  private resetSearchMaxScore(): void {
+    this.searchMaxScore.set(null);
   }
 
   private hydrateFromUrl(): void {

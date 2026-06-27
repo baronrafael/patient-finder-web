@@ -152,5 +152,7 @@ function mapPatientRecord(person: ApiPersonDto): PatientRecord {
     hospitalId: person.center?.id ?? 'unknown',
     hospitalName: centerName,
     sourceHospitalName: centerName,
+    score: person.score ?? null,
+    matchConfidence: null,
   };
 }

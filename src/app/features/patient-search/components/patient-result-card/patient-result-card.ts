@@ -8,6 +8,7 @@ import {
 } from '../../utils/build-patient-contact-summary';
 import { getPatientInitials } from '../../utils/patient-card.presenter';
 import { PATIENT_FIELD_EMPTY_LABELS, hasPatientFieldValue } from '../../utils/patient-field-display';
+import { matchConfidenceLabel } from '../../utils/match-score.utils';
 import { PATIENT_SEARCH_MESSAGES } from '../../utils/patient-search.messages';
 import { isExactDocumentMatch } from '../../utils/patient-search.matcher';
 import { HighlightText } from '../highlight-text/highlight-text';
@@ -53,6 +54,19 @@ export class PatientResultCard {
   });
 
   readonly isExactDocumentMatch = computed(() => isExactDocumentMatch(this.patient(), this.query()));
+
+  readonly matchConfidenceBadge = computed(() => {
+    if (this.isExactDocumentMatch()) {
+      return null;
+    }
+
+    const confidence = this.patient().matchConfidence;
+    return confidence ? matchConfidenceLabel(confidence) : null;
+  });
+
+  readonly matchConfidenceLevel = computed(() =>
+    this.isExactDocumentMatch() ? null : this.patient().matchConfidence,
+  );
 
   readonly hasContact = computed(() => hasPatientFieldValue(this.patient().phone));
 

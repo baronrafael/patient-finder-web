@@ -143,5 +143,7 @@ function createPatient(overrides: Partial<PatientRecord>): PatientRecord {
     hospitalId: overrides.hospitalId ?? 'hospital-a',
     hospitalName,
     sourceHospitalName: overrides.sourceHospitalName ?? hospitalName,
+    score: overrides.score ?? null,
+    matchConfidence: overrides.matchConfidence ?? null,
   };
 }

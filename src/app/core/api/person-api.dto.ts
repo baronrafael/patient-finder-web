@@ -68,6 +68,7 @@ export interface ApiPersonDto {
   readonly notes?: string | null;
   readonly contacts?: unknown;
   readonly created_at?: string | null;
+  readonly score?: number | null;
 }
 
 export interface ApiPaginationDto {
