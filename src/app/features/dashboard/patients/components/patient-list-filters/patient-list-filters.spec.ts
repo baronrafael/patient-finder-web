@@ -10,8 +10,11 @@ describe('PatientListFilters', () => {
     }).compileComponents();
   });
 
+  const centerOptions = [{ id: 'center-1', name: 'Hospital Central' }];
+
   it('shows the submit hint', async () => {
     const fixture = TestBed.createComponent(PatientListFilters);
+    fixture.componentRef.setInput('centerOptions', centerOptions);
     await fixture.whenStable();
 
     expect(fixture.nativeElement.textContent).toContain('Pulsa Buscar para aplicar los filtros.');
@@ -19,26 +22,36 @@ describe('PatientListFilters', () => {
 
   it('disables fields and submit when disabled', async () => {
     const fixture = TestBed.createComponent(PatientListFilters);
+    fixture.componentRef.setInput('centerOptions', centerOptions);
     fixture.componentRef.setInput('disabled', true);
     await fixture.whenStable();
 
     const searchInput = fixture.nativeElement.querySelector('#patient-list-search') as HTMLInputElement;
+    const centerSelect = fixture.nativeElement.querySelector('#patient-list-center') as HTMLSelectElement;
     const sexSelect = fixture.nativeElement.querySelector('#patient-list-sex') as HTMLSelectElement;
     const submitButton = fixture.nativeElement.querySelector('button[type="submit"]') as HTMLButtonElement;
 
     expect(searchInput.disabled).toBe(true);
+    expect(centerSelect.disabled).toBe(true);
     expect(sexSelect.disabled).toBe(true);
     expect(submitButton.disabled).toBe(true);
   });
 
   it('emits normalized filters on submit', async () => {
     const fixture = TestBed.createComponent(PatientListFilters);
-    const emitted: Array<{ query: string; sex: 'm' | 'f' | null; status: string | null }> = [];
+    fixture.componentRef.setInput('centerOptions', centerOptions);
+    const emitted: Array<{
+      query: string;
+      centerId: string | null;
+      sex: 'm' | 'f' | null;
+      status: string | null;
+    }> = [];
     fixture.componentRef.instance.filtersSubmit.subscribe((value) => emitted.push(value));
     await fixture.whenStable();
 
     fixture.componentInstance.filterModel.set({
       query: '  Garcia ',
+      centerId: 'center-1',
       sex: 'f',
       status: 'hospitalized',
     });
@@ -48,12 +61,13 @@ describe('PatientListFilters', () => {
     await fixture.whenStable();
 
     expect(emitted).toEqual([
-      { query: '  Garcia ', sex: 'f', status: 'hospitalized' },
+      { query: '  Garcia ', centerId: 'center-1', sex: 'f', status: 'hospitalized' },
     ]);
   });
 
   it('emits filtersClear when clear button is clicked', async () => {
     const fixture = TestBed.createComponent(PatientListFilters);
+    fixture.componentRef.setInput('centerOptions', centerOptions);
     const clearSpy = vi.fn();
     fixture.componentRef.setInput('hasActiveFilters', true);
     fixture.componentRef.instance.filtersClear.subscribe(clearSpy);

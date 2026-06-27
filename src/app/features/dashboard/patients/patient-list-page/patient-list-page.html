@@ -10,8 +10,11 @@
 
   <app-patient-list-filters
     [applied]="store.appliedFiltersState()"
+    [centerOptions]="centerOptions()"
+    [lockCenter]="lockCenter()"
+    [showAllCentersOption]="showAllCentersOption()"
     [loading]="store.loading()"
-    [disabled]="store.needsCenterSelection()"
+    [disabled]="store.loading()"
     [hasActiveFilters]="store.hasActiveFilters()"
     (filtersSubmit)="store.submitFilters($event)"
     (filtersClear)="store.clearFilters()"
@@ -20,7 +23,7 @@
   @if (store.needsCenterSelection()) {
     <app-empty-state
       title="Selecciona un centro"
-      message="Tienes acceso a varios centros. Elige uno en el panel lateral para ver sus pacientes."
+      message="Elige un centro de salud en los filtros y pulsa Buscar para ver los pacientes."
     />
   } @else if (store.initialLoading()) {
     <app-loading-skeleton />

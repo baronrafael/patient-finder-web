@@ -1,6 +1,9 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { AuthService } from '../../../core/auth/auth.service';
+import { resolveDefaultDashboardPath } from '../../../core/auth/dashboard-navigation.utils';
+import { PermissionService } from '../../../core/auth/permission.service';
 import { DASHBOARD_PATHS } from '../../../core/routing/dashboard.paths';
 
 @Component({
@@ -11,6 +14,13 @@ import { DASHBOARD_PATHS } from '../../../core/routing/dashboard.paths';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppHeader {
+  private readonly auth = inject(AuthService);
+  private readonly permissions = inject(PermissionService);
+
   readonly updatedAt = input<string | null>(null);
-  readonly adminPath = DASHBOARD_PATHS.login;
+  readonly adminPath = computed(() =>
+    this.auth.isAuthenticated()
+      ? resolveDefaultDashboardPath(this.permissions)
+      : DASHBOARD_PATHS.login,
+  );
 }

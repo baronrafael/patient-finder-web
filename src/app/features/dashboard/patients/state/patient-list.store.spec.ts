@@ -19,12 +19,14 @@ const emptyResult: PersonListResult = {
 describe('PatientListStore', () => {
   const activeCenterId = signal<string | null>('center-1');
   const hasMultipleCenters = signal(false);
+  const canListAllCenters = signal(false);
   const list = vi.fn(() => of(emptyResult));
   const deleteFn = vi.fn(() => of(undefined));
 
   beforeEach(() => {
     activeCenterId.set('center-1');
     hasMultipleCenters.set(false);
+    canListAllCenters.set(false);
     list.mockClear();
     deleteFn.mockClear();
 
@@ -40,6 +42,7 @@ describe('PatientListStore', () => {
           useValue: {
             activeCenterId: activeCenterId.asReadonly(),
             hasMultipleCenters: hasMultipleCenters.asReadonly(),
+            canListAllCenters: canListAllCenters.asReadonly(),
             can: () => true,
           },
         },
@@ -50,33 +53,50 @@ describe('PatientListStore', () => {
   it('requires center selection when multiple centers are available', () => {
     hasMultipleCenters.set(true);
     activeCenterId.set(null);
+    canListAllCenters.set(false);
     const store = TestBed.inject(PatientListStore);
 
     expect(store.needsCenterSelection()).toBe(true);
     expect(store.initialLoading()).toBe(false);
   });
 
+  it('does not require center selection for global readers', () => {
+    hasMultipleCenters.set(true);
+    activeCenterId.set(null);
+    canListAllCenters.set(true);
+    const store = TestBed.inject(PatientListStore);
+
+    expect(store.needsCenterSelection()).toBe(false);
+  });
+
   it('applies trimmed filters on submit', () => {
     const store = TestBed.inject(PatientListStore);
 
-    store.submitFilters({ query: '  Garcia ', sex: 'm', status: 'hospitalized' });
+    store.submitFilters({
+      query: '  Garcia ',
+      centerId: 'center-1',
+      sex: 'm',
+      status: 'hospitalized',
+    });
 
     expect(store.appliedFiltersState()).toEqual({
       query: 'Garcia',
+      centerId: 'center-1',
       sex: 'm',
       status: 'hospitalized',
     });
     expect(store.hasActiveFilters()).toBe(true);
   });
 
-  it('clears applied filters', () => {
+  it('clears applied filters but keeps locked center', () => {
     const store = TestBed.inject(PatientListStore);
 
-    store.submitFilters({ query: 'Garcia', sex: null, status: null });
+    store.submitFilters({ query: 'Garcia', centerId: 'center-1', sex: null, status: null });
     store.clearFilters();
 
     expect(store.appliedFiltersState()).toEqual({
       query: '',
+      centerId: 'center-1',
       sex: null,
       status: null,
     });
@@ -87,8 +107,8 @@ describe('PatientListStore', () => {
     const store = TestBed.inject(PatientListStore);
     const reloadSpy = vi.spyOn(store.listResource, 'reload');
 
-    store.submitFilters({ query: 'Garcia', sex: null, status: null });
-    store.submitFilters({ query: 'Garcia', sex: null, status: null });
+    store.submitFilters({ query: 'Garcia', centerId: 'center-1', sex: null, status: null });
+    store.submitFilters({ query: 'Garcia', centerId: 'center-1', sex: null, status: null });
 
     expect(reloadSpy).toHaveBeenCalledTimes(1);
   });

@@ -14,6 +14,7 @@ import { SelectField } from '../../../../../shared/components/select-field/selec
 import { TextField } from '../../../../../shared/components/text-field/text-field';
 import {
   EMPTY_PATIENT_LIST_FILTERS,
+  PatientListCenterOption,
   PatientListFiltersValue,
 } from '../../models/patient-list-filters.model';
 import {
@@ -30,6 +31,9 @@ import {
 })
 export class PatientListFilters {
   readonly applied = input(EMPTY_PATIENT_LIST_FILTERS);
+  readonly centerOptions = input.required<readonly PatientListCenterOption[]>();
+  readonly lockCenter = input(false);
+  readonly showAllCentersOption = input(false);
   readonly loading = input(false);
   readonly disabled = input(false);
   readonly hasActiveFilters = input(false);
@@ -42,12 +46,14 @@ export class PatientListFilters {
 
   readonly filterModel = signal({
     query: '',
+    centerId: '',
     sex: '',
     status: '',
   });
 
   readonly filterForm = form(this.filterModel, (path) => {
     disabled(path.query, () => this.disabled());
+    disabled(path.centerId, () => this.disabled() || this.lockCenter());
     disabled(path.sex, () => this.disabled());
     disabled(path.status, () => this.disabled());
   });
@@ -59,6 +65,7 @@ export class PatientListFilters {
       const applied = this.applied();
       const nextModel = {
         query: applied.query,
+        centerId: applied.centerId ?? '',
         sex: applied.sex ?? '',
         status: applied.status ?? '',
       };
@@ -67,6 +74,7 @@ export class PatientListFilters {
         const current = this.filterModel();
         if (
           current.query === nextModel.query &&
+          current.centerId === nextModel.centerId &&
           current.sex === nextModel.sex &&
           current.status === nextModel.status
         ) {
@@ -74,6 +82,28 @@ export class PatientListFilters {
         }
 
         this.filterModel.set(nextModel);
+      });
+    });
+
+    effect(() => {
+      if (!this.lockCenter()) {
+        return;
+      }
+
+      const lockedCenterId = this.applied().centerId ?? this.centerOptions()[0]?.id ?? '';
+      if (!lockedCenterId) {
+        return;
+      }
+
+      untracked(() => {
+        if (this.filterModel().centerId === lockedCenterId) {
+          return;
+        }
+
+        this.filterModel.update((model) => ({
+          ...model,
+          centerId: lockedCenterId,
+        }));
       });
     });
   }
@@ -101,6 +131,7 @@ export class PatientListFilters {
 
     return {
       query: model.query,
+      centerId: model.centerId.trim() || null,
       sex,
       status: model.status || null,
     };

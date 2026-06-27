@@ -23,9 +23,26 @@ export class PatientListStore {
   readonly deletingId = signal<string | null>(null);
   readonly deleteError = signal<string | null>(null);
 
-  readonly needsCenterSelection = computed(
-    () => this.permissions.hasMultipleCenters() && !this.permissions.activeCenterId(),
-  );
+  readonly needsCenterSelection = computed(() => {
+    if (this.permissions.canListAllCenters()) {
+      return false;
+    }
+
+    if (!this.permissions.hasMultipleCenters()) {
+      return false;
+    }
+
+    return !this.resolvedCenterId();
+  });
+
+  readonly resolvedCenterId = computed(() => {
+    const filterCenterId = this.appliedFilters().centerId;
+    if (filterCenterId) {
+      return filterCenterId;
+    }
+
+    return this.permissions.activeCenterId();
+  });
 
   private readonly listQuery = computed<PersonListQuery | null>(() => {
     if (this.needsCenterSelection()) {
@@ -35,7 +52,7 @@ export class PatientListStore {
     const filters = this.appliedFilters();
     return {
       query: filters.query,
-      centerId: this.permissions.activeCenterId(),
+      centerId: this.resolvedCenterId(),
       sex: filters.sex,
       status: filters.status,
       page: this.page(),
@@ -64,7 +81,11 @@ export class PatientListStore {
 
   readonly hasActiveFilters = computed(() => {
     const filters = this.appliedFilters();
-    return Boolean(filters.query || filters.sex || filters.status);
+    const hasOptionalCenterFilter =
+      Boolean(filters.centerId) &&
+      (this.permissions.canListAllCenters() || this.permissions.hasMultipleCenters());
+
+    return Boolean(filters.query || filters.sex || filters.status || hasOptionalCenterFilter);
   });
 
   readonly loading = computed(() => !this.needsCenterSelection() && this.listResource.isLoading());
@@ -110,7 +131,9 @@ export class PatientListStore {
   constructor() {
     effect(() => {
       this.permissions.activeCenterId();
+      this.permissions.canListAllCenters();
       untracked(() => {
+        this.syncLockedCenterFilter();
         this.resetToFirstPage();
       });
     });
@@ -119,6 +142,7 @@ export class PatientListStore {
   submitFilters(value: PatientListFiltersValue): void {
     const nextFilters: PatientListFiltersValue = {
       query: value.query.trim(),
+      centerId: value.centerId,
       sex: value.sex,
       status: value.status,
     };
@@ -136,7 +160,7 @@ export class PatientListStore {
   }
 
   clearFilters(): void {
-    this.appliedFilters.set(EMPTY_PATIENT_LIST_FILTERS);
+    this.appliedFilters.set(this.createDefaultFilters());
     this.resetToFirstPage();
   }
 
@@ -193,8 +217,46 @@ export class PatientListStore {
     this.page.set(1);
     this.errorState.set(null);
   }
+
+  private createDefaultFilters(): PatientListFiltersValue {
+    const lockedCenterId = this.defaultCenterId();
+    return {
+      ...EMPTY_PATIENT_LIST_FILTERS,
+      ...(lockedCenterId ? { centerId: lockedCenterId } : {}),
+    };
+  }
+
+  private defaultCenterId(): string | null {
+    if (this.permissions.canListAllCenters()) {
+      return null;
+    }
+
+    return this.permissions.activeCenterId();
+  }
+
+  private syncLockedCenterFilter(): void {
+    const lockedCenterId = this.defaultCenterId();
+    if (!lockedCenterId) {
+      return;
+    }
+
+    const current = this.appliedFilters();
+    if (current.centerId === lockedCenterId) {
+      return;
+    }
+
+    this.appliedFilters.set({
+      ...current,
+      centerId: lockedCenterId,
+    });
+  }
 }
 
 function filtersEqual(left: PatientListFiltersValue, right: PatientListFiltersValue): boolean {
-  return left.query === right.query && left.sex === right.sex && left.status === right.status;
+  return (
+    left.query === right.query &&
+    left.centerId === right.centerId &&
+    left.sex === right.sex &&
+    left.status === right.status
+  );
 }
