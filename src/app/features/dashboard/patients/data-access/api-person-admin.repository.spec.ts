@@ -81,4 +81,14 @@ describe('ApiPersonAdminRepository', () => {
     expect(result.id).toBe('person-1');
     expect(result.formValue).toEqual(value);
   });
+
+  it('deletes a person with DELETE', async () => {
+    const deletePromise = firstValueFrom(repository.delete('person-1'));
+
+    const request = httpMock.expectOne('https://api.test/persons/person-1');
+    expect(request.request.method).toBe('DELETE');
+    request.flush(null);
+
+    await expect(deletePromise).resolves.toBeUndefined();
+  });
 });

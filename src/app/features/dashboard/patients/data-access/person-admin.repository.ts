@@ -13,4 +13,6 @@ export abstract class PersonAdminRepository {
   abstract create(value: PersonFormValue): Observable<PersonAdminRecord>;
 
   abstract update(id: string, value: PersonFormValue): Observable<PersonAdminRecord>;
+
+  abstract delete(id: string): Observable<void>;
 }

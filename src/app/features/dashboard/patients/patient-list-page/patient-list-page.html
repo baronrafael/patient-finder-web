@@ -45,6 +45,8 @@
       <app-patient-list-table
         [items]="store.items()"
         [patientDetailPath]="paths.patientDetail"
+        [deletingId]="store.deletingId()"
+        (deleteRequested)="onDeleteRequested($event)"
       />
 
       <nav
@@ -75,3 +77,12 @@
     </div>
   }
 </app-page-shell>
+
+<app-delete-patient-dialog
+  [open]="deleteDialogOpen()"
+  [patientName]="deleteTarget()?.fullName ?? ''"
+  [loading]="store.deletingId() !== null"
+  [errorMessage]="store.deleteError()"
+  (confirmed)="onDeleteConfirmed()"
+  (dismissed)="onDeleteDismissed()"
+/>

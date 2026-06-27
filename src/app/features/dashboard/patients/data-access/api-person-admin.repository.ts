@@ -79,4 +79,10 @@ export class ApiPersonAdminRepository extends PersonAdminRepository {
         })),
       );
   }
+
+  override delete(id: string): Observable<void> {
+    return this.http
+      .delete(`${this.config.apiBaseUrl}/persons/${id}`)
+      .pipe(map(() => undefined));
+  }
 }

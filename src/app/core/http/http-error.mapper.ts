@@ -11,6 +11,10 @@ export function mapHttpError(error: unknown): string {
       return 'Ya existe un paciente con esos datos. Revisa la lista o edita el registro existente.';
     }
 
+    if (error.status === 403) {
+      return 'No tienes permiso para realizar esta acción.';
+    }
+
     if (error.status >= 400 && error.status < 500) {
       return 'No pudimos completar la solicitud. Revisa los datos e intenta de nuevo.';
     }

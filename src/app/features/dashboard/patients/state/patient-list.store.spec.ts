@@ -20,18 +20,20 @@ describe('PatientListStore', () => {
   const activeCenterId = signal<string | null>('center-1');
   const hasMultipleCenters = signal(false);
   const list = vi.fn(() => of(emptyResult));
+  const deleteFn = vi.fn(() => of(undefined));
 
   beforeEach(() => {
     activeCenterId.set('center-1');
     hasMultipleCenters.set(false);
     list.mockClear();
+    deleteFn.mockClear();
 
     TestBed.configureTestingModule({
       providers: [
         PatientListStore,
         {
           provide: PERSON_ADMIN_REPOSITORY,
-          useValue: { list },
+          useValue: { list, delete: deleteFn },
         },
         {
           provide: PermissionService,
@@ -89,5 +91,17 @@ describe('PatientListStore', () => {
     store.submitFilters({ query: 'Garcia', sex: null, status: null });
 
     expect(reloadSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('deletes a person and reloads the list', async () => {
+    const store = TestBed.inject(PatientListStore);
+    const reloadSpy = vi.spyOn(store.listResource, 'reload');
+
+    const deleted = await store.deletePerson('person-1');
+
+    expect(deleted).toBe(true);
+    expect(deleteFn).toHaveBeenCalledWith('person-1');
+    expect(reloadSpy).toHaveBeenCalled();
+    expect(store.deleteError()).toBeNull();
   });
 });

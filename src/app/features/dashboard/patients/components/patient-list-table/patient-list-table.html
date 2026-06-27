@@ -29,8 +29,13 @@
                 <a class="btn btn-soft btn-sm" [routerLink]="patientDetailPath()(person.id)">Editar</a>
               }
               @if (person.canDelete) {
-                <button class="btn btn-soft btn-sm" type="button" disabled title="Próximamente">
-                  Eliminar
+                <button
+                  class="btn btn-soft btn-sm text-error"
+                  type="button"
+                  [disabled]="deletingId() === person.id"
+                  (click)="deleteRequested.emit(person)"
+                >
+                  {{ deletingId() === person.id ? 'Eliminando…' : 'Eliminar' }}
                 </button>
               }
             </div>

@@ -1,6 +1,6 @@
 import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { catchError, of } from 'rxjs';
+import { catchError, firstValueFrom, of } from 'rxjs';
 
 import { PermissionService } from '../../../../core/auth/permission.service';
 import { mapHttpError } from '../../../../core/http/http-error.mapper';
@@ -20,6 +20,8 @@ export class PatientListStore {
   private readonly appliedFilters = signal<PatientListFiltersValue>(EMPTY_PATIENT_LIST_FILTERS);
   readonly page = signal(1);
   private readonly errorState = signal<string | null>(null);
+  readonly deletingId = signal<string | null>(null);
+  readonly deleteError = signal<string | null>(null);
 
   readonly needsCenterSelection = computed(
     () => this.permissions.hasMultipleCenters() && !this.permissions.activeCenterId(),
@@ -152,6 +154,39 @@ export class PatientListStore {
   retry(): void {
     this.errorState.set(null);
     this.listResource.reload();
+  }
+
+  clearDeleteError(): void {
+    this.deleteError.set(null);
+  }
+
+  async deletePerson(id: string): Promise<boolean> {
+    if (this.deletingId()) {
+      return false;
+    }
+
+    this.deleteError.set(null);
+    this.deletingId.set(id);
+
+    try {
+      await firstValueFrom(this.repository.delete(id));
+
+      const wasOnlyItemOnPage = this.items().length === 1;
+      const currentPage = this.currentPage();
+
+      if (wasOnlyItemOnPage && currentPage > 1) {
+        this.page.set(currentPage - 1);
+      } else {
+        this.listResource.reload();
+      }
+
+      return true;
+    } catch (error) {
+      this.deleteError.set(mapHttpError(error));
+      return false;
+    } finally {
+      this.deletingId.set(null);
+    }
   }
 
   private resetToFirstPage(): void {
