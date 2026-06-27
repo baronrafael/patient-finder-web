@@ -21,9 +21,9 @@
     <p class="app-header__subtitle">
       Ayuda a localizar familiares reportados en hospitales y centros de atención.
     </p>
-    @if (updatedAt(); as updatedLabel) {
-      <div class="app-header__updated" role="status" aria-live="polite">
-        <div class="app-header__updated-icon" aria-hidden="true">
+    @if (formattedStats(); as summary) {
+      <div class="app-header__highlight" role="status" aria-live="polite">
+        <div class="app-header__highlight-icon" aria-hidden="true">
           <svg viewBox="0 0 20 20" fill="currentColor">
             <path
               fill-rule="evenodd"
@@ -32,13 +32,22 @@
             />
           </svg>
         </div>
-        <div class="app-header__updated-body">
-          <p class="app-header__updated-label">Lista actualizada</p>
-          <p class="app-header__updated-date">{{ updatedLabel }}</p>
+        <div class="app-header__highlight-body">
+          <p class="app-header__stats">
+            <span>{{ summary.totalPersons }} pacientes registrados</span>
+            <span class="app-header__stats-separator" aria-hidden="true">·</span>
+            <span>{{ summary.totalCenters }} centros de atención</span>
+          </p>
+          @if (updatedAt(); as updatedLabel) {
+            <div class="app-header__updated-meta">
+              <p class="app-header__updated-label">Lista actualizada</p>
+              <p class="app-header__updated-date">{{ updatedLabel }}</p>
+            </div>
+          }
         </div>
       </div>
     } @else {
-      <p class="app-header__updated app-header__updated--pending">Cargando fecha de actualización...</p>
+      <p class="app-header__highlight app-header__highlight--pending">Cargando información del registro...</p>
     }
   </div>
 </header>

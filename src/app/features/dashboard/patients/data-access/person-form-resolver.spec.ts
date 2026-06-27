@@ -43,6 +43,7 @@ const catalog: PatientRepository = {
   search: () => {
     throw new Error('not used');
   },
+  getStats: () => of(null),
   getHospitals: () => of([]),
 };
 

@@ -3,6 +3,7 @@ import { takeUntilDestroyed, rxResource } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EMPTY, Subject, catchError, finalize, forkJoin, map, of, switchMap, tap } from 'rxjs';
 
+import { formatUserDateTime } from '../../../core/i18n/format-user-datetime.util';
 import { mapHttpError } from '../../../core/http/http-error.mapper';
 import { APP_CONFIG } from '../../../core/config/app-config.token';
 import { ActiveFilterKey } from '../models/active-filter-chip.model';
@@ -16,6 +17,7 @@ import { Estado, Municipio, Parroquia } from '../models/location.model';
 import { PatientFilters } from '../models/patient-filters.model';
 import { PatientSearchQuery } from '../models/patient-search-query.model';
 import { PatientSearchResult } from '../models/patient-search-result.model';
+import { PatientSearchStats } from '../models/patient-search-stats.model';
 import { PatientSex } from '../models/patient-sex.model';
 import {
   enrichPatientsWithMatchConfidence,
@@ -77,7 +79,7 @@ export class PatientSearchStore {
   readonly error = signal<string | null>(null);
   readonly result = signal<PatientSearchResult | null>(null);
   readonly hasSearched = signal(false);
-  readonly lastUpdatedAt = signal<string | null>(null);
+  readonly stats = signal<PatientSearchStats | null>(null);
   private readonly searchMaxScore = signal<number | null>(null);
 
   readonly hospitalsResource = rxResource({
@@ -162,16 +164,12 @@ export class PatientSearchStore {
   });
 
   readonly formattedUpdatedAt = computed(() => {
-    const updatedAt = this.lastUpdatedAt();
+    const updatedAt = this.stats()?.lastUpdatedAt;
     if (!updatedAt) {
       return null;
     }
 
-    return new Intl.DateTimeFormat('es-VE', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-      timeZone: 'America/Caracas',
-    }).format(new Date(updatedAt));
+    return formatUserDateTime(updatedAt);
   });
 
   readonly activeFilterChips = computed(() =>
@@ -482,7 +480,6 @@ export class PatientSearchStore {
           return this.resolveSearchRequest(this.buildSearchQuery()).pipe(
             tap((searchResult) => {
               this.applySearchResult(searchResult);
-              this.lastUpdatedAt.set(searchResult.updatedAt);
             }),
             catchError((searchError: unknown) => {
               if (this.page() > 1) {
@@ -626,15 +623,11 @@ export class PatientSearchStore {
   }
 
   private loadDatasetMetadata(): void {
-    if (!this.config.useMockData) {
-      return;
-    }
-
     this.repository
-      .search(this.buildSearchQuery(''))
+      .getStats()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (searchResult) => this.lastUpdatedAt.set(searchResult.updatedAt),
+        next: (stats) => this.stats.set(stats),
         error: () => undefined,
       });
   }

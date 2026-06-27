@@ -12,6 +12,7 @@ import { Estado, Municipio, Parroquia } from '../../models/location.model';
 import { PatientRecord } from '../../models/patient-record.model';
 import { PatientSearchQuery } from '../../models/patient-search-query.model';
 import { PatientSearchResult } from '../../models/patient-search-result.model';
+import { PatientSearchStats } from '../../models/patient-search-stats.model';
 import { patientSearchRoutes } from '../../patient-search.routes';
 import { PATIENT_SEARCH_DEBOUNCE_MS, PATIENT_SEARCH_PAGE_SIZE } from '../../utils/patient-search.constants';
 import { PatientSearchPage } from './patient-search-page';
@@ -71,6 +72,14 @@ class TestPatientRepository extends PatientRepository {
 
   override getParroquias(_municipioId: string): Observable<readonly Parroquia[]> {
     return of([]);
+  }
+
+  override getStats(): Observable<PatientSearchStats | null> {
+    return of({
+      totalPersons: 3133,
+      totalCenters: 13,
+      lastUpdatedAt: updatedAt,
+    });
   }
 
   override search(query: PatientSearchQuery): Observable<PatientSearchResult> {
@@ -189,7 +198,7 @@ describe('PatientSearchPage', () => {
 
     expect(store.selectedEstadoId()).toBe('miranda');
     expect(store.selectedMunicipioId()).toBe('chacao');
-    expect(repository.searchCalls).toBe(1);
+    expect(repository.searchCalls).toBe(0);
   });
 
   it('resets filters only when the query becomes empty', () => {

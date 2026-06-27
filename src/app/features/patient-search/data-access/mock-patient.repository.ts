@@ -8,6 +8,7 @@ import { Estado, Municipio, Parroquia } from '../models/location.model';
 import { PatientDataset } from '../models/patient-dataset.model';
 import { PatientSearchQuery } from '../models/patient-search-query.model';
 import { PatientSearchResult } from '../models/patient-search-result.model';
+import { PatientSearchStats } from '../models/patient-search-stats.model';
 import { searchPatients } from '../utils/patient-search.rank';
 import { PatientRepository } from './patient.repository';
 
@@ -56,6 +57,16 @@ export class MockPatientRepository extends PatientRepository {
         return [];
       }),
       take(1),
+    );
+  }
+
+  override getStats(): Observable<PatientSearchStats | null> {
+    return this.dataset$.pipe(
+      map((dataset) => ({
+        totalPersons: dataset.metadata.totalRecords,
+        totalCenters: dataset.hospitals.length,
+        lastUpdatedAt: dataset.metadata.updatedAt,
+      })),
     );
   }
 

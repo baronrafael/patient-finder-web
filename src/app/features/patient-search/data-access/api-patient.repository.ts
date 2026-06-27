@@ -24,9 +24,12 @@ import { Estado, Municipio, Parroquia } from '../models/location.model';
 import { PatientRecord } from '../models/patient-record.model';
 import { PatientSearchQuery } from '../models/patient-search-query.model';
 import { PatientSearchResult } from '../models/patient-search-result.model';
+import { PatientSearchStats } from '../models/patient-search-stats.model';
 import { CENTERS_PAGE_SIZE } from '../utils/patient-search.constants';
 import { PatientRepository } from './patient.repository';
 import { ApiPersonDto } from '../../../core/api/person-api.dto';
+import { mapStatsResponse } from '../../../core/api/stats-api.mapper';
+import { ApiStatsResponseDto } from '../../../core/api/stats-api.dto';
 
 @Injectable({ providedIn: 'root' })
 export class ApiPatientRepository extends PatientRepository {
@@ -90,6 +93,12 @@ export class ApiPatientRepository extends PatientRepository {
           })),
         ),
       );
+  }
+
+  override getStats(): Observable<PatientSearchStats | null> {
+    return this.http
+      .get<ApiStatsResponseDto>(`${this.config.apiBaseUrl}/stats`)
+      .pipe(map((response) => mapStatsResponse(response)));
   }
 
   override search(query: PatientSearchQuery): Observable<PatientSearchResult> {
