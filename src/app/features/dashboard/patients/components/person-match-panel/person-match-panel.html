@@ -1,0 +1,74 @@
+<section
+  class="person-match-panel"
+  aria-live="polite"
+  [attr.aria-busy]="isBusy()"
+>
+  <header class="person-match-panel__header">
+    <h2 class="person-match-panel__title">{{ title() }}</h2>
+    <p class="person-match-panel__description">{{ description() }}</p>
+  </header>
+
+  @if (status() === 'exact') {
+    <div class="person-match-panel__banner alert alert-error text-sm" role="alert">
+      Este paciente parece estar registrado. Usa el registro existente en lugar de duplicarlo.
+    </div>
+  }
+
+  @if (showSkeleton()) {
+    <ul class="person-match-panel__skeleton" aria-hidden="true">
+      @for (row of [0, 1, 2]; track row) {
+        <li class="person-match-panel__skeleton-row skeleton h-20 w-full rounded-lg"></li>
+      }
+    </ul>
+  } @else if (hasMatches()) {
+    <ul class="person-match-panel__matches">
+      @for (match of matches(); track match.patient.id) {
+        <li
+          class="person-match-panel__match"
+          [class.person-match-panel__match--exact]="match.kind === 'exact'"
+          [class.person-match-panel__match--similar]="match.kind === 'similar'"
+        >
+          <div class="person-match-panel__match-header">
+            <p class="person-match-panel__match-name">{{ match.patient.fullName }}</p>
+            <span
+              class="person-match-panel__badge"
+              [class.person-match-panel__badge--exact]="match.kind === 'exact'"
+              [class.person-match-panel__badge--similar]="match.kind === 'similar'"
+            >
+              {{ matchBadge(match.kind) }}
+            </span>
+          </div>
+
+          <dl class="person-match-panel__facts">
+            @if (match.patient.identityDocument) {
+              <div class="person-match-panel__fact">
+                <dt>Cédula</dt>
+                <dd>{{ match.patient.identityDocument }}</dd>
+              </div>
+            }
+            <div class="person-match-panel__fact">
+              <dt>Centro</dt>
+              <dd>{{ match.patient.hospitalName }}</dd>
+            </div>
+            @if (match.patient.phone) {
+              <div class="person-match-panel__fact">
+                <dt>Contacto</dt>
+                <dd>{{ match.patient.phone }}</dd>
+              </div>
+            }
+          </dl>
+
+          <button
+            class="btn btn-soft btn-sm mt-3"
+            type="button"
+            (click)="onViewMatch(match.patient.id)"
+          >
+            Ver registro
+          </button>
+        </li>
+      }
+    </ul>
+  } @else if (status() === 'error') {
+    <button class="btn btn-soft btn-sm" type="button" (click)="onRetry()">Reintentar</button>
+  }
+</section>

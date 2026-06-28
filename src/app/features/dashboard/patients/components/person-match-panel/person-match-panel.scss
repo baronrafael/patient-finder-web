@@ -1,0 +1,121 @@
+.person-match-panel {
+  display: grid;
+  gap: 1rem;
+  border: 1px solid rgb(226 232 240);
+  border-radius: 0.75rem;
+  background: rgb(248 250 252);
+  padding: 1rem;
+}
+
+.person-match-panel__header {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.person-match-panel__title {
+  color: rgb(15 23 42);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.person-match-panel__description {
+  color: rgb(71 85 105);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.person-match-panel__banner {
+  margin: 0;
+}
+
+.person-match-panel__skeleton {
+  display: grid;
+  gap: 0.75rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.person-match-panel__matches {
+  display: grid;
+  gap: 0.75rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.person-match-panel__match {
+  border: 1px solid rgb(226 232 240);
+  border-radius: 0.625rem;
+  background: white;
+  padding: 0.875rem;
+}
+
+.person-match-panel__match--exact {
+  border-color: rgb(252 165 165);
+  background: rgb(254 242 242);
+}
+
+.person-match-panel__match--similar {
+  border-color: rgb(253 230 138);
+  background: rgb(255 251 235);
+}
+
+.person-match-panel__match-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.person-match-panel__match-name {
+  color: rgb(15 23 42);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.person-match-panel__badge {
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.125rem 0.5rem;
+  text-transform: uppercase;
+}
+
+.person-match-panel__badge--exact {
+  background: rgb(254 226 226);
+  color: rgb(153 27 27);
+}
+
+.person-match-panel__badge--similar {
+  background: rgb(254 243 199);
+  color: rgb(146 64 14);
+}
+
+.person-match-panel__facts {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.625rem 0 0;
+}
+
+.person-match-panel__fact {
+  display: flex;
+  gap: 0.5rem;
+  color: rgb(71 85 105);
+  font-size: 0.8125rem;
+
+  dt {
+    font-weight: 600;
+    min-width: 4.25rem;
+  }
+
+  dd {
+    margin: 0;
+    min-width: 0;
+  }
+}

@@ -13,6 +13,8 @@
           autocomplete="given-name"
           [refinedBorder]="true"
           [field]="form.firstName"
+          (inputted)="onIdentityInput()"
+          (blurred)="onIdentityBlur()"
         />
         @if (showErrors()) {
           @let error = fieldErrorMarkup('firstName');
@@ -33,7 +35,8 @@
           autocomplete="family-name"
           [refinedBorder]="true"
           [field]="form.lastName"
-          (blurred)="onLastNameBlur()"
+          (inputted)="onIdentityInput()"
+          (blurred)="onIdentityBlur()"
         />
         @if (showErrors()) {
           @let error = fieldErrorMarkup('lastName');
@@ -55,7 +58,8 @@
           placeholder="Ej. 28443736"
           [refinedBorder]="true"
           [field]="form.cedula"
-          (blurred)="onCedulaBlur()"
+          (inputted)="onIdentityInput()"
+          (blurred)="onIdentityBlur()"
         />
         @if (showErrors()) {
           @let error = fieldErrorMarkup('cedula');

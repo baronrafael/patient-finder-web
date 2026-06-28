@@ -22,22 +22,15 @@ import {
   PersonFormField,
   PersonFormValue,
 } from '../../models/person-form.model';
-import {
-  MIN_PERSON_CEDULA_DIGITS,
-  PERSON_SEX_FORM_OPTIONS,
-  PERSON_STATUS_FORM_OPTIONS,
-} from '../../utils/person-form.constants';
+import { PERSON_SEX_FORM_OPTIONS, PERSON_STATUS_FORM_OPTIONS } from '../../utils/person-form.constants';
+import { buildDuplicateSearchQuery } from '../../utils/person-duplicate.utils';
 import {
   createEmptyPersonFormModel,
   personFormModelToValue,
   personFormValueToModel,
   PersonFormModel,
 } from '../../utils/person-form.mapper';
-import {
-  isPersonFormValid,
-  normalizePersonFormCedula,
-  validatePersonForm,
-} from '../../utils/person-form.validation';
+import { isPersonFormValid, validatePersonForm } from '../../utils/person-form.validation';
 
 export interface PersonFormCenterOption {
   readonly id: string;
@@ -61,6 +54,7 @@ export class PersonForm {
   readonly centerOptions = input.required<readonly PersonFormCenterOption[]>();
 
   readonly submitted = output<PersonFormValue>();
+  readonly identityChanged = output<PersonFormValue>();
   readonly identityBlurred = output<PersonFormValue>();
 
   readonly sexOptions = PERSON_SEX_FORM_OPTIONS;
@@ -166,6 +160,15 @@ export class PersonForm {
         this.previousMunicipioId = municipioId;
       });
     });
+
+  }
+
+  onIdentityInput(): void {
+    if (this.disabled()) {
+      return;
+    }
+
+    this.identityChanged.emit(personFormModelToValue(this.formModel()));
   }
 
   onSubmit(event: Event): void {
@@ -208,24 +211,17 @@ export class PersonForm {
     return Boolean(this.fieldError('identity'));
   }
 
-  onCedulaBlur(): void {
-    if (this.disabled()) {
-      return;
-    }
-
-    const value = personFormModelToValue(this.formModel());
-    if (normalizePersonFormCedula(value.cedula).length >= MIN_PERSON_CEDULA_DIGITS) {
-      this.identityBlurred.emit(value);
-    }
+  onIdentityBlur(): void {
+    this.emitIdentityBlurIfSearchable();
   }
 
-  onLastNameBlur(): void {
+  private emitIdentityBlurIfSearchable(): void {
     if (this.disabled()) {
       return;
     }
 
     const value = personFormModelToValue(this.formModel());
-    if (value.firstName.trim() && value.lastName.trim()) {
+    if (buildDuplicateSearchQuery(value)) {
       this.identityBlurred.emit(value);
     }
   }

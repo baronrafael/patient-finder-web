@@ -1,0 +1,18 @@
+.patient-form-layout {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+
+  @media (min-width: 1024px) {
+    align-items: start;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 22rem);
+  }
+}
+
+.patient-form-layout__main {
+  min-width: 0;
+}
+
+.patient-form-layout__aside {
+  min-width: 0;
+}

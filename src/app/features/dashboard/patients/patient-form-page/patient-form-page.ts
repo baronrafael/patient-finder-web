@@ -14,6 +14,7 @@ import { PageShell } from '../../../../shared/components/page-shell/page-shell';
 import { PATIENT_REPOSITORY } from '../../../patient-search/data-access/patient-repository.token';
 import { DuplicateWarningDialog } from '../components/duplicate-warning-dialog/duplicate-warning-dialog';
 import { PersonForm } from '../components/person-form/person-form';
+import { PersonMatchPanel } from '../components/person-match-panel/person-match-panel';
 import { DuplicateCheckService } from '../data-access/duplicate-check.service';
 import { providePersonAdminRepository } from '../data-access/person-admin-repository.provider';
 import { PERSON_ADMIN_REPOSITORY } from '../data-access/person-admin-repository.token';
@@ -22,9 +23,8 @@ import {
   emptyDuplicateCheckResult,
 } from '../models/duplicate-check-result.model';
 import { PersonFormValue } from '../models/person-form.model';
+import { PatientRegistrationMatchStore } from '../state/patient-registration-match.store';
 import { defaultAdmittedAtLocal } from '../utils/person-form.mapper';
-
-const DUPLICATE_CHECK_DEBOUNCE_MS = 400;
 
 @Component({
   selector: 'app-patient-form-page',
@@ -33,12 +33,14 @@ const DUPLICATE_CHECK_DEBOUNCE_MS = 400;
     PageHeader,
     PageShell,
     PersonForm,
+    PersonMatchPanel,
     LoadingSkeleton,
     ErrorState,
     DuplicateWarningDialog,
   ],
-  providers: [providePersonAdminRepository()],
+  providers: [providePersonAdminRepository(), PatientRegistrationMatchStore],
   templateUrl: './patient-form-page.html',
+  styleUrl: './patient-form-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PatientFormPage {
@@ -48,8 +50,7 @@ export class PatientFormPage {
   private readonly repository = inject(PATIENT_REPOSITORY);
   private readonly adminRepository = inject(PERSON_ADMIN_REPOSITORY);
   private readonly duplicateCheck = inject(DuplicateCheckService);
-
-  private duplicateCheckTimer: ReturnType<typeof setTimeout> | null = null;
+  readonly matchStore = inject(PatientRegistrationMatchStore);
 
   readonly paths = DASHBOARD_PATHS;
   readonly saving = signal(false);
@@ -134,14 +135,12 @@ export class PatientFormPage {
     this.personResource.reload();
   }
 
-  onIdentityBlurred(value: PersonFormValue): void {
-    if (this.duplicateCheckTimer) {
-      clearTimeout(this.duplicateCheckTimer);
-    }
+  onIdentityChanged(value: PersonFormValue): void {
+    this.matchStore.updateIdentity(value, this.personId());
+  }
 
-    this.duplicateCheckTimer = setTimeout(() => {
-      void this.runDuplicateCheck(value, { openDialog: true });
-    }, DUPLICATE_CHECK_DEBOUNCE_MS);
+  onIdentityBlurred(value: PersonFormValue): void {
+    this.matchStore.lookupNow(value, this.personId());
   }
 
   async onSubmitted(value: PersonFormValue): Promise<void> {
@@ -194,23 +193,6 @@ export class PatientFormPage {
     void this.router.navigate([this.paths.patientDetail(personId)]);
   }
 
-  private async runDuplicateCheck(
-    value: PersonFormValue,
-    options: { openDialog: boolean },
-  ): Promise<void> {
-    const result = await firstValueFrom(
-      this.duplicateCheck.checkDuplicates(value, this.personId()),
-    );
-
-    if (options.openDialog && result.kind !== 'none') {
-      if (result.kind === 'similar') {
-        this.pendingSubmit.set(null);
-      }
-
-      this.openDuplicateDialog(result);
-    }
-  }
-
   private openDuplicateDialog(result: DuplicateCheckResult): void {
     this.duplicateResult.set(result);
     this.duplicateDialogOpen.set(true);
@@ -228,6 +210,7 @@ export class PatientFormPage {
       }
 
       this.duplicateCheck.clearCache();
+      this.matchStore.clear();
       await this.router.navigate([this.paths.patients]);
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.status === 409) {

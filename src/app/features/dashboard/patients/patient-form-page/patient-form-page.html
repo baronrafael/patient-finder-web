@@ -16,15 +16,30 @@
       <div class="alert alert-warning mt-4 text-sm" role="status">{{ warning }}</div>
     }
 
-    <app-person-form
-      [initialValue]="value"
-      [centerOptions]="centerOptions()"
-      [lockCenter]="lockCenter()"
-      [submitLabel]="submitLabel()"
-      [disabled]="saving()"
-      (identityBlurred)="onIdentityBlurred($event)"
-      (submitted)="onSubmitted($event)"
-    />
+    <div class="patient-form-layout">
+      <div class="patient-form-layout__main">
+        <app-person-form
+          [initialValue]="value"
+          [centerOptions]="centerOptions()"
+          [lockCenter]="lockCenter()"
+          [submitLabel]="submitLabel()"
+          [disabled]="saving()"
+          (identityChanged)="onIdentityChanged($event)"
+          (identityBlurred)="onIdentityBlurred($event)"
+          (submitted)="onSubmitted($event)"
+        />
+      </div>
+
+      <aside class="patient-form-layout__aside">
+        <app-person-match-panel
+          [status]="matchStore.status()"
+          [result]="matchStore.result()"
+          [error]="matchStore.error()"
+          (retryRequested)="matchStore.retry()"
+          (viewMatch)="onDuplicateEdit($event)"
+        />
+      </aside>
+    </div>
   }
 
   <app-duplicate-warning-dialog

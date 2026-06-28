@@ -20,4 +20,5 @@ export class TextField {
   readonly refinedBorder = input(false);
 
   readonly blurred = output<void>();
+  readonly inputted = output<void>();
 }
